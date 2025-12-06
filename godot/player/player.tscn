@@ -1,0 +1,21 @@
+[gd_scene load_steps=3 format=3 uid="uid://djue2jfmxkahd"]
+
+[sub_resource type="SphereMesh" id="SphereMesh_kqu6x"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_kqu6x"]
+
+[node name="Player" type="Node"]
+
+[node name="KinematicBody" type="CharacterBody3D" parent="."]
+
+[node name="PlayerMesh" type="MeshInstance3D" parent="KinematicBody"]
+mesh = SubResource("SphereMesh_kqu6x")
+
+[node name="SphereCollider" type="CollisionShape3D" parent="KinematicBody"]
+shape = SubResource("SphereShape3D_kqu6x")
+
+[node name="DynamicBody" type="RigidBody3D" parent="."]
+process_mode = 4
+
+[node name="SphereCollider" type="CollisionShape3D" parent="DynamicBody"]
+shape = SubResource("SphereShape3D_kqu6x")

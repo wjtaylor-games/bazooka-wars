@@ -1,0 +1,60 @@
+[gd_scene load_steps=6 format=3 uid="uid://drnw1j34w2nyq"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_7dm0k"]
+size = Vector3(8, 1, 8)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ig7tw"]
+size = Vector3(8, 1, 8)
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_7dm0k"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ig7tw"]
+albedo_color = Color(1, 0, 0, 1)
+
+[sub_resource type="SphereMesh" id="SphereMesh_0xm2m"]
+material = SubResource("StandardMaterial3D_ig7tw")
+
+[node name="Main" type="Node3D"]
+
+[node name="Ground" type="StaticBody3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Ground"]
+shape = SubResource("BoxShape3D_7dm0k")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Ground"]
+mesh = SubResource("BoxMesh_ig7tw")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.8941386, 0.4477903, 0, -0.4477903, 0.8941386, 0, 1.2876562, 2.9927533)
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.21492279, 0.97663105, 0, -0.97663105, 0.21492279, 0, 6.5396166, 0)
+
+[node name="Balls" type="Node" parent="."]
+
+[node name="Ball" type="RigidBody3D" parent="Balls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1101539, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Balls/Ball"]
+shape = SubResource("SphereShape3D_7dm0k")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Balls/Ball"]
+mesh = SubResource("SphereMesh_0xm2m")
+
+[node name="Ball3" type="RigidBody3D" parent="Balls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.4029286, 1.1101539, -1.8027804)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Balls/Ball3"]
+shape = SubResource("SphereShape3D_7dm0k")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Balls/Ball3"]
+mesh = SubResource("SphereMesh_0xm2m")
+
+[node name="Ball2" type="RigidBody3D" parent="Balls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.31832755, 2.2843359, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Balls/Ball2"]
+shape = SubResource("SphereShape3D_7dm0k")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Balls/Ball2"]
+mesh = SubResource("SphereMesh_0xm2m")
