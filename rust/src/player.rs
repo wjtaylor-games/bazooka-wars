@@ -1,20 +1,15 @@
 use godot::prelude::*;
+
+#[allow(unused_imports)]
 use godot::classes::{RigidBody3D, IRigidBody3D, CharacterBody3D, ICharacterBody3D,
-    Input, InputEvent, Camera3D};
-use godot::global::{deg_to_rad, acos};
-use std::f32::consts::{TAU, PI};
+    Input, InputEvent, Camera3D, InputEventMouseMotion, MeshInstance3D};
+use godot::classes::input::MouseMode;
 use godot::classes::ProjectSettings;
 // use godot::global::{wrapf};
 // use num::clamp;
 
-const SHOOT_TIME: f32 = 1.5;
-const SHOOT_SCALE: f32 = 2.0;
-const CHAR_SCALE: Vector3 = Vector3::new(0.3, 0.3, 0.3);
-const TURN_SPEED: f32 = 40.0;
-const BULLET_SPEED: f32 = 20.0;
-const AIR_IDLE_DEACCEL: bool = false;
-const AIR_ACCEL_FACTOR: f32 = 0.8;
-const SHARP_TURN_THRESHOLD: f32 = 140.0 * PI / 180.0;
+// const SHOOT_SCALE: f32 = 2.0;
+// const CHAR_SCALE: Vector3 = Vector3::new(0.3, 0.3, 0.3);
 
 
 #[derive(GodotClass)]
@@ -31,7 +26,7 @@ pub struct Player {
 #[derive(GodotClass)]
 #[class(base=CharacterBody3D)]
 pub struct PlayerKinematicBody {
-    player_camera: OnReady<Gd<Camera3D>>,
+    camera: OnReady<Gd<Camera3D>>,
     jumping: bool,
     #[export]
     gravity: Vector3,
@@ -43,6 +38,8 @@ pub struct PlayerKinematicBody {
     deaccel: f32,
     #[export]
     max_speed: f32,
+    #[export]
+    mouse_sensitivity: f32,
     base: Base<CharacterBody3D>
 }
 
@@ -52,16 +49,22 @@ impl ICharacterBody3D for PlayerKinematicBody {
     fn init(base: Base<CharacterBody3D>) -> Self {
         let project_settings = ProjectSettings::singleton();
         Self {
-            player_camera: OnReady::from_node("PlayerCamera"),
+            camera: OnReady::from_node("PlayerCamera"),
             jumping: true,
             gravity: project_settings.get_setting("physics/3d/default_gravity").to::<f32>() *
                 project_settings.get_setting("physics/3d/default_gravity_vector").to::<Vector3>(),
             jump_velocity: 4.0,
-            accel: 8.0,
-            deaccel: 8.0,
+            accel: 12.0,
+            deaccel: 12.0,
             max_speed: 4.0,
+            mouse_sensitivity: 0.005,
             base,
         }
+    }
+
+    fn ready(&mut self) {
+        let mut input = Input::singleton();
+        input.set_mouse_mode(MouseMode::CAPTURED);
     }
 
     fn physics_process(&mut self, delta: f32) {
@@ -112,8 +115,26 @@ impl ICharacterBody3D for PlayerKinematicBody {
         );
 
         self.base_mut().move_and_slide();
+    }
+    
+    fn input(&mut self, event: Gd<InputEvent>) {
+        if Input::singleton().get_mouse_mode() == MouseMode::CAPTURED {
+            match event.try_cast::<InputEventMouseMotion>() {
+                Ok(e) => {
+                    // Set the Kinematic Player yaw rotation
+                    let motion_vec = e.get_relative() * self.mouse_sensitivity;
+                    let mut rotation = self.base().get_rotation();
+                    rotation.y -= motion_vec.x;
+                    self.base_mut().set_rotation(rotation);
 
-
+                    // Set the Camera pitch rotation
+                    let mut cam_rotation = self.camera.get_rotation();
+                    cam_rotation.x -= motion_vec.y;
+                    self.camera.set_rotation(cam_rotation);
+                }
+                Err(_) => {}
+            }
+        }
     }
 }
 
