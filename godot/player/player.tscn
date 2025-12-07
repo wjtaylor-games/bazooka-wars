@@ -4,18 +4,22 @@
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_kqu6x"]
 
-[node name="Player" type="Node"]
+[node name="Player" type="Player"]
 
-[node name="KinematicBody" type="CharacterBody3D" parent="."]
+[node name="PlayerKinematicBody" type="PlayerKinematicBody" parent="."]
 
-[node name="PlayerMesh" type="MeshInstance3D" parent="KinematicBody"]
+[node name="PlayerMesh" type="MeshInstance3D" parent="PlayerKinematicBody"]
 mesh = SubResource("SphereMesh_kqu6x")
 
-[node name="SphereCollider" type="CollisionShape3D" parent="KinematicBody"]
+[node name="SphereCollider" type="CollisionShape3D" parent="PlayerKinematicBody"]
 shape = SubResource("SphereShape3D_kqu6x")
 
-[node name="DynamicBody" type="RigidBody3D" parent="."]
+[node name="PlayerCamera" type="Camera3D" parent="PlayerKinematicBody"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.52978826)
+current = true
+
+[node name="PlayerDynamicBody" type="PlayerDynamicBody" parent="."]
 process_mode = 4
 
-[node name="SphereCollider" type="CollisionShape3D" parent="DynamicBody"]
+[node name="SphereCollider" type="CollisionShape3D" parent="PlayerDynamicBody"]
 shape = SubResource("SphereShape3D_kqu6x")
