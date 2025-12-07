@@ -5,8 +5,9 @@ use godot::classes::{RigidBody3D, IRigidBody3D, CharacterBody3D, ICharacterBody3
     Input, InputEvent, Camera3D, InputEventMouseMotion, MeshInstance3D};
 use godot::classes::input::MouseMode;
 use godot::classes::ProjectSettings;
-// use godot::global::{wrapf};
-// use num::clamp;
+use std::f32::consts::{TAU, PI};
+use godot::global::{wrapf};
+use num::clamp;
 
 // const SHOOT_SCALE: f32 = 2.0;
 // const CHAR_SCALE: Vector3 = Vector3::new(0.3, 0.3, 0.3);
@@ -124,12 +125,15 @@ impl ICharacterBody3D for PlayerKinematicBody {
                     // Set the Kinematic Player yaw rotation
                     let motion_vec = e.get_relative() * self.mouse_sensitivity;
                     let mut rotation = self.base().get_rotation();
-                    rotation.y -= motion_vec.x;
+                    rotation.y = wrapf(
+                        (rotation.y - motion_vec.x) as f64,
+                        0.0, TAU as f64) as f32;
                     self.base_mut().set_rotation(rotation);
 
                     // Set the Camera pitch rotation
                     let mut cam_rotation = self.camera.get_rotation();
-                    cam_rotation.x -= motion_vec.y;
+                    cam_rotation.x = clamp::<f32>(cam_rotation.x - motion_vec.y,
+                        -PI/2.0, PI/2.0);
                     self.camera.set_rotation(cam_rotation);
                 }
                 Err(_) => {}

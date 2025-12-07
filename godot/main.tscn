@@ -1,4 +1,4 @@
-[gd_scene load_steps=4 format=3 uid="uid://drnw1j34w2nyq"]
+[gd_scene load_steps=7 format=3 uid="uid://drnw1j34w2nyq"]
 
 [ext_resource type="PackedScene" uid="uid://djue2jfmxkahd" path="res://player/player.tscn" id="1_ig7tw"]
 
@@ -7,6 +7,17 @@ size = Vector3(8, 1, 8)
 
 [sub_resource type="BoxMesh" id="BoxMesh_ig7tw"]
 size = Vector3(8, 1, 8)
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_ig7tw"]
+sun_angle_max = 11.78
+sun_curve = 0.4966691
+
+[sub_resource type="Sky" id="Sky_0xm2m"]
+sky_material = SubResource("ProceduralSkyMaterial_ig7tw")
+
+[sub_resource type="Environment" id="Environment_h2yge"]
+background_mode = 2
+sky = SubResource("Sky_0xm2m")
 
 [node name="Main" type="Node3D"]
 
@@ -26,3 +37,6 @@ transform = Transform3D(1, 0, 0, 0, 0.21492279, 0.97663105, 0, -0.97663105, 0.21
 
 [node name="Player" parent="." instance=ExtResource("1_ig7tw")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.0252211, 0)
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_h2yge")

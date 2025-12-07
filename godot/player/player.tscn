@@ -1,21 +1,18 @@
 [gd_scene load_steps=3 format=3 uid="uid://djue2jfmxkahd"]
 
-[sub_resource type="SphereMesh" id="SphereMesh_kqu6x"]
-
 [sub_resource type="SphereShape3D" id="SphereShape3D_kqu6x"]
+
+[sub_resource type="SphereMesh" id="SphereMesh_kqu6x"]
 
 [node name="Player" type="Player"]
 
 [node name="PlayerKinematicBody" type="PlayerKinematicBody" parent="."]
 
-[node name="PlayerMesh" type="MeshInstance3D" parent="PlayerKinematicBody"]
-mesh = SubResource("SphereMesh_kqu6x")
-
 [node name="SphereCollider" type="CollisionShape3D" parent="PlayerKinematicBody"]
 shape = SubResource("SphereShape3D_kqu6x")
 
 [node name="PlayerCamera" type="Camera3D" parent="PlayerKinematicBody"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.52978826)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.2725258)
 current = true
 
 [node name="PlayerDynamicBody" type="PlayerDynamicBody" parent="."]
@@ -23,3 +20,7 @@ process_mode = 4
 
 [node name="SphereCollider" type="CollisionShape3D" parent="PlayerDynamicBody"]
 shape = SubResource("SphereShape3D_kqu6x")
+
+[node name="PlayerMesh" type="MeshInstance3D" parent="PlayerDynamicBody"]
+mesh = SubResource("SphereMesh_kqu6x")
+skeleton = NodePath("../../PlayerKinematicBody")
