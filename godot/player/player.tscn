@@ -1,6 +1,15 @@
-[gd_scene load_steps=3 format=3 uid="uid://djue2jfmxkahd"]
+[gd_scene load_steps=5 format=3 uid="uid://djue2jfmxkahd"]
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_kqu6x"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_kqu6x"]
+albedo_color = Color(0.13, 0.13, 0.13, 1)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_oul6g"]
+material = SubResource("StandardMaterial3D_kqu6x")
+top_radius = 0.2
+bottom_radius = 0.2
+height = 1.4
 
 [sub_resource type="SphereMesh" id="SphereMesh_kqu6x"]
 
@@ -15,12 +24,18 @@ shape = SubResource("SphereShape3D_kqu6x")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.2725258)
 current = true
 
+[node name="Bazooka" type="Node3D" parent="PlayerKinematicBody"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.62046945, 0.12717438, 0)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="PlayerKinematicBody/Bazooka"]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 0, -0.19504392)
+mesh = SubResource("CylinderMesh_oul6g")
+
+[node name="PlayerMesh" type="MeshInstance3D" parent="PlayerKinematicBody"]
+mesh = SubResource("SphereMesh_kqu6x")
+
 [node name="PlayerDynamicBody" type="PlayerDynamicBody" parent="."]
 process_mode = 4
 
 [node name="SphereCollider" type="CollisionShape3D" parent="PlayerDynamicBody"]
 shape = SubResource("SphereShape3D_kqu6x")
-
-[node name="PlayerMesh" type="MeshInstance3D" parent="PlayerDynamicBody"]
-mesh = SubResource("SphereMesh_kqu6x")
-skeleton = NodePath("../../PlayerKinematicBody")
