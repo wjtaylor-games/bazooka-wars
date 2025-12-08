@@ -1,0 +1,7 @@
+[gd_resource type="StandardMaterial3D" format=3 uid="uid://b3jhh4cetcqqr"]
+
+[resource]
+resource_name = "bazooka"
+cull_mode = 2
+albedo_color = Color(0, 0, 0, 1)
+metallic = 1.0
