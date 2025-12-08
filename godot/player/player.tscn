@@ -88,6 +88,9 @@ material = SubResource("StandardMaterial3D_rkbax")
 [node name="Player" type="Player"]
 
 [node name="PlayerKinematicBody" type="PlayerKinematicBody" parent="."]
+process_mode = 1
+collision_layer = 16
+collision_mask = 17
 
 [node name="SphereCollider" type="CollisionShape3D" parent="PlayerKinematicBody"]
 shape = SubResource("SphereShape3D_kqu6x")
@@ -111,9 +114,20 @@ skeleton = NodePath("")
 
 [node name="PlayerMesh" type="MeshInstance3D" parent="PlayerKinematicBody"]
 mesh = SubResource("SphereMesh_kqu6x")
+skeleton = NodePath("../../PlayerKinematicBody")
 
 [node name="PlayerDynamicBody" type="PlayerDynamicBody" parent="."]
-process_mode = 4
+process_mode = 1
+collision_layer = 32
+collision_mask = 33
 
 [node name="SphereCollider" type="CollisionShape3D" parent="PlayerDynamicBody"]
 shape = SubResource("SphereShape3D_kqu6x")
+
+[node name="PlayerMesh" type="MeshInstance3D" parent="PlayerDynamicBody"]
+mesh = SubResource("SphereMesh_kqu6x")
+skeleton = NodePath("../../PlayerKinematicBody")
+
+[node name="RagdollTimer" type="Timer" parent="."]
+wait_time = 3.0
+one_shot = true

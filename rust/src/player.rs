@@ -2,7 +2,9 @@ use godot::prelude::*;
 
 #[allow(unused_imports)]
 use godot::classes::{RigidBody3D, IRigidBody3D, CharacterBody3D, ICharacterBody3D,
-    Input, InputEvent, Camera3D, InputEventMouseMotion, MeshInstance3D};
+    Input, InputEvent, Camera3D, InputEventMouseMotion, MeshInstance3D, Timer,
+    InputEventAction,
+};
 use godot::classes::input::MouseMode;
 use godot::classes::ProjectSettings;
 use std::f32::consts::{TAU, PI};
@@ -20,7 +22,76 @@ pub struct Player {
     player_kinematic_body: OnReady<Gd<PlayerKinematicBody>>,
     #[init(node="PlayerDynamicBody")]
     player_dynamic_body: OnReady<Gd<PlayerDynamicBody>>,
+    #[init(node="RagdollTimer")]
+    ragdoll_timer: OnReady<Gd<Timer>>,
+    #[export]
+    #[init(val=false)]
+    ragdoll: bool,
     base: Base<Node3D>
+}
+
+#[godot_api]
+impl INode3D for Player {
+    fn physics_process(&mut self, _delta: f32) {
+        if self.ragdoll {
+            self.player_kinematic_body.set_position(
+                self.player_dynamic_body.get_position()
+            );
+            self.player_kinematic_body.set_velocity(
+                self.player_dynamic_body.get_linear_velocity()
+            );
+        } else {
+            self.player_dynamic_body.set_position(
+                self.player_kinematic_body.get_position()
+            );
+            self.player_dynamic_body.set_linear_velocity(
+                self.player_kinematic_body.get_velocity()
+            );
+        }
+    }
+
+    fn input(&mut self, event: Gd<InputEvent>) {
+        if event.is_action_pressed("ragdoll") {
+            godot_print!("ragdoll activated");
+            self.begin_ragdoll();
+        }
+    }
+
+    fn ready(&mut self) {
+        if self.ragdoll {
+            self.begin_ragdoll();
+        } else {
+            self.end_ragdoll();
+        }
+
+        self.ragdoll_timer
+            .signals()
+            .timeout()
+            .connect_other(&self.to_gd(), Self::end_ragdoll);
+    }
+}
+
+#[godot_api]
+impl Player {
+
+    #[func]
+    pub fn begin_ragdoll(&mut self) {
+        self.ragdoll_timer.start();
+        self.ragdoll = true;
+        self.player_kinematic_body.set_visible(false);
+        self.player_kinematic_body.set_physics_process(false);
+        self.player_dynamic_body.set_visible(true);
+        self.player_dynamic_body.set_physics_process(true);
+    }
+
+    #[func]
+    pub fn end_ragdoll(&mut self) {
+        self.ragdoll = false;
+        self.player_kinematic_body.set_visible(true);
+        self.player_kinematic_body.set_physics_process(true);
+        self.player_dynamic_body.set_visible(false);
+        self.player_dynamic_body.set_physics_process(false);
+    }
 }
 
 
