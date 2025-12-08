@@ -38,6 +38,9 @@ transform = Transform3D(1, 0, 0, 0, 0.21492279, 0.97663105, 0, -0.97663105, 0.21
 [node name="Player" parent="." instance=ExtResource("1_ig7tw")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.0252211, 0)
 
+[node name="Player2" parent="." instance=ExtResource("1_ig7tw")]
+transform = Transform3D(-1, 0, -0.00013962586, 0, 1, 0, 0.00013962586, 0, -1, 0, 1.0252211, -2.3327258)
+
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_h2yge")
 

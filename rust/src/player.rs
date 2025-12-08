@@ -29,6 +29,7 @@ pub struct Player {
 pub struct PlayerKinematicBody {
     camera: OnReady<Gd<Camera3D>>,
     bazooka: OnReady<Gd<Node3D>>,
+    mesh: OnReady<Gd<MeshInstance3D>>,
     jumping: bool,
     #[export]
     gravity: Vector3,
@@ -53,6 +54,7 @@ impl ICharacterBody3D for PlayerKinematicBody {
         Self {
             camera: OnReady::from_node("PlayerCamera"),
             bazooka: OnReady::from_node("Bazooka"),
+            mesh: OnReady::from_node("PlayerMesh"),
             jumping: true,
             gravity: project_settings.get_setting("physics/3d/default_gravity").to::<f32>() *
                 project_settings.get_setting("physics/3d/default_gravity_vector").to::<Vector3>(),
@@ -138,6 +140,7 @@ impl ICharacterBody3D for PlayerKinematicBody {
                         -PI/2.0, PI/2.0);
                     self.camera.set_rotation(cam_rotation);
                     self.bazooka.set_rotation(cam_rotation);
+                    self.mesh.set_rotation(cam_rotation);
                 }
                 Err(_) => {}
             }
