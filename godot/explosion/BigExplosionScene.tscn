@@ -18,7 +18,6 @@ linear_accel_max = -1.0
 
 [node name="Explosion1" type="GPUParticles3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.00112057, -0.00427759, -0.00190479)
-visible = false
 material_override = ExtResource("1_an4hs")
 amount = 300
 lifetime = 2.13
@@ -30,7 +29,6 @@ draw_pass_1 = SubResource("QuadMesh_16uck")
 
 [node name="Explosion2" type="GPUParticles3D" parent="."]
 transform = Transform3D(0.996103, 0, 0, 0, 0.996103, 0, 0, 0, 1, -0.00112057, -0.00427759, -0.00190479)
-visible = false
 material_override = ExtResource("1_an4hs")
 amount = 400
 lifetime = 2.13

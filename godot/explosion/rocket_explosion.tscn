@@ -1,4 +1,4 @@
-[gd_scene load_steps=4 format=3 uid="uid://cpvatkdnhkqxp"]
+[gd_scene load_steps=5 format=3 uid="uid://cpvatkdnhkqxp"]
 
 [ext_resource type="Material" uid="uid://cxhaa6i7bto07" path="res://explosion/ExplosionMaterial.tres" id="1_hyoin"]
 
@@ -6,21 +6,26 @@
 angle_max = 1.0
 spread = 180.0
 initial_velocity_min = 0.5
-initial_velocity_max = 10.0
-angular_velocity_max = 10.0
+initial_velocity_max = 2.0
+angular_velocity_min = -1.6093254e-05
+angular_velocity_max = 1.9999839
+radial_velocity_min = 4.9999776
+radial_velocity_max = 4.9999776
 gravity = Vector3(0, 0, 0)
-linear_accel_min = -1.0
-linear_accel_max = -1.0
-scale_min = 5.0
-scale_max = 5.0
+linear_accel_min = -0.10000224
+linear_accel_max = -0.10000224
 
 [sub_resource type="QuadMesh" id="QuadMesh_uk2s7"]
 size = Vector2(5, 5)
 
-[node name="RocketExplosion" type="Node3D"]
+[sub_resource type="SphereShape3D" id="SphereShape3D_hyoin"]
 
-[node name="Explosion1" type="GPUParticles3D" parent="."]
+[node name="RocketExplosion" type="Area3D"]
+
+[node name="ExplosionParticles" type="GPUParticles3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.00112057, -0.00427759, -0.00190479)
 material_override = ExtResource("1_hyoin")
+cast_shadow = 0
 amount = 100
 lifetime = 2.13
 explosiveness = 0.91
@@ -28,3 +33,6 @@ randomness = 0.84
 fixed_fps = 60
 process_material = SubResource("ParticleProcessMaterial_e21hy")
 draw_pass_1 = SubResource("QuadMesh_uk2s7")
+
+[node name="CollisionSphere" type="CollisionShape3D" parent="."]
+shape = SubResource("SphereShape3D_hyoin")
