@@ -31,7 +31,6 @@ pub struct Player {
     #[export]
     #[init(val=false)]
     ragdoll: bool,
-    #[init(val=Vector3::ZERO)]
     init_pos: Vector3,
     init_rot: Vector3,
     base: Base<Area3D>
@@ -119,15 +118,15 @@ impl Player {
 
     #[func]
     pub fn reset_pos(&mut self) {
+        // Reset to initial position
         let pos = self.init_pos;
         self.base_mut().set_position(pos);
         self.player_dynamic_body.set_position(pos);
         self.player_kinematic_body.set_position(pos);
-        self.player_dynamic_body.set_position(self.init_rot);
-        self.player_kinematic_body.set_position(self.init_rot);
+        self.player_dynamic_body.set_rotation(self.init_rot);
+        self.player_kinematic_body.set_rotation(self.init_rot);
         self.player_dynamic_body.set_linear_velocity(Vector3::ZERO);
-        self.player_dynamic_body.set_linear_velocity(Vector3::ZERO);
-        self.player_dynamic_body.set_angular_velocity(Vector3::ZERO);
+        self.player_kinematic_body.set_velocity(Vector3::ZERO);
         self.player_dynamic_body.set_angular_velocity(Vector3::ZERO);
         self.end_ragdoll();
     }
