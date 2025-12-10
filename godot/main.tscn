@@ -1,6 +1,7 @@
-[gd_scene load_steps=8 format=3 uid="uid://drnw1j34w2nyq"]
+[gd_scene load_steps=9 format=3 uid="uid://drnw1j34w2nyq"]
 
 [ext_resource type="PackedScene" uid="uid://djue2jfmxkahd" path="res://player/player.tscn" id="1_ig7tw"]
+[ext_resource type="PackedScene" uid="uid://cpvatkdnhkqxp" path="res://explosion/rocket_explosion.tscn" id="2_0xm2m"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_7dm0k"]
 size = Vector3(32, 1, 32)
@@ -94,3 +95,6 @@ offset_right = 20.0
 offset_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+
+[node name="RocketExplosion" parent="." instance=ExtResource("2_0xm2m")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9703312, -10)
