@@ -31,6 +31,9 @@ pub struct Player {
     #[export]
     #[init(val=false)]
     ragdoll: bool,
+    #[init(val=Vector3::ZERO)]
+    init_pos: Vector3,
+    init_rot: Vector3,
     base: Base<Area3D>
 }
 
@@ -54,6 +57,11 @@ impl IArea3D for Player {
         }
         let pos = self.player_dynamic_body.get_position();
         self.base_mut().set_position(pos);
+        
+        // Out of bounds condition
+        if pos.y < -10.0 {
+            self.reset_pos();
+        }
     }
 
     fn input(&mut self, event: Gd<InputEvent>) {
@@ -65,8 +73,13 @@ impl IArea3D for Player {
 
     fn ready(&mut self) {
         let pos = self.base().get_position();
+        let rot = self.base().get_rotation();
+        self.init_pos = pos;
+        self.init_rot = rot;
         self.player_dynamic_body.set_position(pos);
         self.player_kinematic_body.set_position(pos);
+        self.player_dynamic_body.set_rotation(rot);
+        self.player_kinematic_body.set_rotation(rot);
         if self.ragdoll {
             self.begin_ragdoll();
         } else {
@@ -102,8 +115,23 @@ impl Player {
             }
             Err(_) => {}
         }
-
     }
+
+    #[func]
+    pub fn reset_pos(&mut self) {
+        let pos = self.init_pos;
+        self.base_mut().set_position(pos);
+        self.player_dynamic_body.set_position(pos);
+        self.player_kinematic_body.set_position(pos);
+        self.player_dynamic_body.set_position(self.init_rot);
+        self.player_kinematic_body.set_position(self.init_rot);
+        self.player_dynamic_body.set_linear_velocity(Vector3::ZERO);
+        self.player_dynamic_body.set_linear_velocity(Vector3::ZERO);
+        self.player_dynamic_body.set_angular_velocity(Vector3::ZERO);
+        self.player_dynamic_body.set_angular_velocity(Vector3::ZERO);
+        self.end_ragdoll();
+    }
+
 
     #[func]
     pub fn begin_ragdoll(&mut self) {

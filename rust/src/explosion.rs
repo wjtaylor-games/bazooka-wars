@@ -29,7 +29,8 @@ impl IArea3D for Explosion {
 impl Explosion {
 }
 
-// // Make multiple explosions
-// #[derive(GodotClass)]
-// #[class(base=Node3D, init)]
-// pub struct RepeatExploder {
+// Make multiple explosions
+#[derive(GodotClass)]
+#[class(base=Node3D, init)]
+pub struct RepeatExploder {
+}
