@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://drnw1j34w2nyq"]
+[gd_scene load_steps=11 format=3 uid="uid://drnw1j34w2nyq"]
 
 [ext_resource type="PackedScene" uid="uid://djue2jfmxkahd" path="res://player/player.tscn" id="1_ig7tw"]
 [ext_resource type="PackedScene" uid="uid://cpvatkdnhkqxp" path="res://explosion/rocket_explosion.tscn" id="2_0xm2m"]
@@ -12,6 +12,12 @@ albedo_color = Color(0.13725491, 0.3647059, 0.02745098, 1)
 [sub_resource type="BoxMesh" id="BoxMesh_ig7tw"]
 material = SubResource("StandardMaterial3D_ig7tw")
 size = Vector3(32, 1, 32)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_0xm2m"]
+size = Vector3(1, 8, 32)
+
+[sub_resource type="BoxMesh" id="BoxMesh_h2yge"]
+size = Vector3(1, 8, 32)
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_ig7tw"]
 sun_angle_max = 11.78
@@ -37,14 +43,21 @@ shape = SubResource("BoxShape3D_7dm0k")
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Ground"]
 mesh = SubResource("BoxMesh_ig7tw")
 
-[node name="Camera3D" type="Camera3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.8941386, 0.4477903, 0, -0.4477903, 0.8941386, 0, 1.2876562, 2.9927533)
-
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 0.21492279, 0.97663105, 0, -0.97663105, 0.21492279, 0, 6.5396166, 0)
 shadow_enabled = true
 
+[node name="Wall" type="StaticBody3D" parent="."]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -0.04511547, 2.0803518, 15.95948)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Wall"]
+shape = SubResource("BoxShape3D_0xm2m")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Wall"]
+mesh = SubResource("BoxMesh_h2yge")
+
 [node name="Player" parent="." instance=ExtResource("1_ig7tw")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.1592293, 0)
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_h2yge")
@@ -97,3 +110,6 @@ grow_vertical = 2
 
 [node name="RocketExplosion" parent="." instance=ExtResource("2_0xm2m")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9703312, -10)
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(0.3452818, 0.4202508, -0.8391482, 0, 0.89413863, 0.44779032, 0.9384991, -0.15461385, 0.30872977, -12.69988, 5.847363, 6.341898)

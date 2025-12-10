@@ -89,6 +89,7 @@ material = SubResource("StandardMaterial3D_rkbax")
 
 [node name="PlayerKinematicBody" type="PlayerKinematicBody" parent="."]
 process_mode = 1
+top_level = true
 collision_layer = 16
 collision_mask = 17
 
@@ -118,6 +119,7 @@ skeleton = NodePath("../../PlayerKinematicBody")
 
 [node name="PlayerDynamicBody" type="PlayerDynamicBody" parent="."]
 process_mode = 1
+top_level = true
 collision_layer = 32
 collision_mask = 33
 

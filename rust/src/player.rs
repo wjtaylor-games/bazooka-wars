@@ -52,9 +52,8 @@ impl IArea3D for Player {
                 self.player_kinematic_body.get_velocity()
             );
         }
-        self.sphere_collider.set_position(
-            self.player_dynamic_body.get_position()
-        );
+        let pos = self.player_dynamic_body.get_position();
+        self.base_mut().set_position(pos);
     }
 
     fn input(&mut self, event: Gd<InputEvent>) {
@@ -65,6 +64,9 @@ impl IArea3D for Player {
     }
 
     fn ready(&mut self) {
+        let pos = self.base().get_position();
+        self.player_dynamic_body.set_position(pos);
+        self.player_kinematic_body.set_position(pos);
         if self.ragdoll {
             self.begin_ragdoll();
         } else {
@@ -89,8 +91,14 @@ impl Player {
     pub fn on_area_entered(&mut self, area: Gd<Area3D>) {
         godot_print!("Area Entered");
         match area.try_cast::<Explosion>() {
-            Ok(_explosion) => {
+            Ok(explosion) => {
                 self.begin_ragdoll();
+                let radius_vec = self.player_dynamic_body.get_position()
+                    - explosion.get_position();
+                let new_velocity =
+                    radius_vec.normalized_or_zero() * 20.0
+                    + Vector3::UP * 15.0;
+                self.player_dynamic_body.set_linear_velocity(new_velocity);
             }
             Err(_) => {}
         }
