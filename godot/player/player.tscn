@@ -131,3 +131,6 @@ skeleton = NodePath("../../PlayerKinematicBody")
 [node name="RagdollTimer" type="Timer" parent="."]
 wait_time = 3.0
 one_shot = true
+
+[node name="SphereCollider" type="CollisionShape3D" parent="."]
+shape = SubResource("SphereShape3D_kqu6x")

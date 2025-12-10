@@ -27,7 +27,7 @@ sky = SubResource("Sky_0xm2m")
 [node name="Main" type="Node3D"]
 
 [node name="Ground" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9914699, 0.13033585, 0, -0.13033585, 0.9914699, 0, 0, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.3771799, 0)
 collision_layer = 49
 collision_mask = 49
 
@@ -45,7 +45,6 @@ transform = Transform3D(1, 0, 0, 0, 0.21492279, 0.97663105, 0, -0.97663105, 0.21
 shadow_enabled = true
 
 [node name="Player" parent="." instance=ExtResource("1_ig7tw")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5877476, 0)
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_h2yge")

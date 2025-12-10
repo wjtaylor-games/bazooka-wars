@@ -19,8 +19,9 @@ linear_accel_max = -0.10000224
 size = Vector2(5, 5)
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_hyoin"]
+radius = 4.0
 
-[node name="RocketExplosion" type="Area3D"]
+[node name="RocketExplosion" type="Explosion"]
 
 [node name="ExplosionParticles" type="GPUParticles3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.00112057, -0.00427759, -0.00190479)

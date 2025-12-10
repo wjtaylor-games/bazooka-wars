@@ -3,7 +3,7 @@ use godot::prelude::*;
 #[allow(unused_imports)]
 use godot::classes::{RigidBody3D, IRigidBody3D, CharacterBody3D, ICharacterBody3D,
     Input, InputEvent, Camera3D, InputEventMouseMotion, MeshInstance3D, Timer,
-    InputEventAction,
+    InputEventAction, Area3D, IArea3D, CollisionShape3D
 };
 use godot::classes::input::MouseMode;
 use godot::classes::ProjectSettings;
@@ -11,27 +11,31 @@ use std::f32::consts::{TAU, PI};
 use godot::global::{wrapf};
 use num::clamp;
 
+use crate::explosion::Explosion;
+
 // const SHOOT_SCALE: f32 = 2.0;
 // const CHAR_SCALE: Vector3 = Vector3::new(0.3, 0.3, 0.3);
 
 
 #[derive(GodotClass)]
-#[class(base=Node3D, init)]
+#[class(base=Area3D, init)]
 pub struct Player {
     #[init(node="PlayerKinematicBody")]
     player_kinematic_body: OnReady<Gd<PlayerKinematicBody>>,
     #[init(node="PlayerDynamicBody")]
     player_dynamic_body: OnReady<Gd<PlayerDynamicBody>>,
+    #[init(node="SphereCollider")]
+    sphere_collider: OnReady<Gd<CollisionShape3D>>,
     #[init(node="RagdollTimer")]
     ragdoll_timer: OnReady<Gd<Timer>>,
     #[export]
     #[init(val=false)]
     ragdoll: bool,
-    base: Base<Node3D>
+    base: Base<Area3D>
 }
 
 #[godot_api]
-impl INode3D for Player {
+impl IArea3D for Player {
     fn physics_process(&mut self, _delta: f32) {
         if self.ragdoll {
             self.player_kinematic_body.set_position(
@@ -48,6 +52,9 @@ impl INode3D for Player {
                 self.player_kinematic_body.get_velocity()
             );
         }
+        self.sphere_collider.set_position(
+            self.player_dynamic_body.get_position()
+        );
     }
 
     fn input(&mut self, event: Gd<InputEvent>) {
@@ -68,11 +75,27 @@ impl INode3D for Player {
             .signals()
             .timeout()
             .connect_other(&self.to_gd(), Self::end_ragdoll);
-    }
+
+        self.signals()
+            .area_entered()
+            .connect_self(Self::on_area_entered);
+    }    
 }
 
 #[godot_api]
 impl Player {
+
+    #[func]
+    pub fn on_area_entered(&mut self, area: Gd<Area3D>) {
+        godot_print!("Area Entered");
+        match area.try_cast::<Explosion>() {
+            Ok(_explosion) => {
+                self.begin_ragdoll();
+            }
+            Err(_) => {}
+        }
+
+    }
 
     #[func]
     pub fn begin_ragdoll(&mut self) {
@@ -101,6 +124,7 @@ pub struct PlayerKinematicBody {
     camera: OnReady<Gd<Camera3D>>,
     bazooka: OnReady<Gd<Node3D>>,
     mesh: OnReady<Gd<MeshInstance3D>>,
+    parent_player: OnReady<Gd<Player>>,
     jumping: bool,
     #[export]
     gravity: Vector3,
@@ -126,6 +150,7 @@ impl ICharacterBody3D for PlayerKinematicBody {
             camera: OnReady::from_node("PlayerCamera"),
             bazooka: OnReady::from_node("Bazooka"),
             mesh: OnReady::from_node("PlayerMesh"),
+            parent_player: OnReady::from_node(".."),
             jumping: true,
             gravity: project_settings.get_setting("physics/3d/default_gravity").to::<f32>() *
                 project_settings.get_setting("physics/3d/default_gravity_vector").to::<Vector3>(),
@@ -216,6 +241,14 @@ impl ICharacterBody3D for PlayerKinematicBody {
                 Err(_) => {}
             }
         }
+    }
+}
+
+#[godot_api]
+impl PlayerKinematicBody {
+    #[func]
+    pub fn on_explosion(&mut self) {
+
     }
 }
 
