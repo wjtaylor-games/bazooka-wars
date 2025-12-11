@@ -2,7 +2,7 @@ use godot::prelude::*;
 
 #[allow(unused_imports)]
 use godot::classes::{Area3D, IArea3D, Node3D, INode3D,
-    GpuParticles3D,
+    GpuParticles3D, Timer, ITimer
 };
 
 #[allow(unused_imports)]
@@ -13,6 +13,7 @@ use crate::player::{Player, PlayerKinematicBody, PlayerDynamicBody};
 pub struct Explosion {
     #[init(node="ExplosionParticles")]
     explosion_particles: OnReady<Gd<GpuParticles3D>>,
+    physics_time: f32,
     base: Base<Area3D>,
 }
 
@@ -20,17 +21,72 @@ pub struct Explosion {
 impl IArea3D for Explosion {
     fn ready(&mut self) {
         // Explosion should explode one time
-        self.explosion_particles.set_one_shot(false);
+        godot_print!("Time to explode");
+        self.explosion_particles.set_one_shot(true);
         self.explosion_particles.set_emitting(true);
+
+        self.explosion_particles
+            .signals()
+            .finished()
+            .connect_other(&self.to_gd(), Self::on_visibility_screen_exited);
+    }
+
+    fn physics_process(&mut self, delta: f32) {
+        // Keep track of how long the explosion has existed.
+        self.physics_time += delta;
     }
 }
 
 #[godot_api]
 impl Explosion {
+    #[func]
+    fn on_visibility_screen_exited(&mut self) {
+        // Explosion is done exploding
+        self.base_mut().queue_free();
+    }
+
+    #[func]
+    pub fn get_time(&self) -> f32 {
+        self.physics_time
+    }
 }
 
-// Make multiple explosions
+// A repeating explosion emitter
 #[derive(GodotClass)]
 #[class(base=Node3D, init)]
 pub struct RepeatExploder {
+    #[init(val=OnReady::from_loaded("res://explosion/rocket_explosion.tscn"))]
+    explosion_scene: OnReady<Gd<PackedScene>>,
+    #[init(node="Timer")]
+    timer: OnReady<Gd<Timer>>,
+    base: Base<Node3D>,
+}
+
+#[godot_api]
+impl INode3D for RepeatExploder {
+    fn ready(&mut self) {
+        self.timer.start();
+        self.timer
+            .signals()
+            .timeout()
+            .connect_other(&self.to_gd(), Self::on_timer_timeout);
+    }
+}
+
+#[godot_api]
+impl RepeatExploder {
+    #[func]
+    fn on_timer_timeout(&mut self) {
+        godot_print!("timeout");
+        self.spawn_new_explosion();
+        self.timer.start();
+    }
+
+    #[func]
+    pub fn spawn_new_explosion(&mut self) {
+        let explosion = self.explosion_scene
+            .instantiate_as::<Explosion>();
+        self.base_mut().add_child(&explosion);
+    }
+
 }

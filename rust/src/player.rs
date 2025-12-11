@@ -104,13 +104,15 @@ impl Player {
         godot_print!("Area Entered");
         match area.try_cast::<Explosion>() {
             Ok(explosion) => {
-                self.begin_ragdoll();
-                let radius_vec = self.player_dynamic_body.get_position()
-                    - explosion.get_position();
-                let new_velocity =
-                    radius_vec.normalized_or_zero() * 20.0
-                    + Vector3::UP * 15.0;
-                self.player_dynamic_body.set_linear_velocity(new_velocity);
+                if explosion.bind().get_time() < 0.2 {
+                    self.begin_ragdoll();
+                    let radius_vec = self.player_dynamic_body.get_position()
+                        - explosion.get_position();
+                    let new_velocity =
+                        radius_vec.normalized_or_zero() * 20.0
+                        + Vector3::UP * 15.0;
+                    self.player_dynamic_body.set_linear_velocity(new_velocity);
+                }
             }
             Err(_) => {}
         }

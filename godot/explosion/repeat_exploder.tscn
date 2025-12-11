@@ -1,0 +1,16 @@
+[gd_scene load_steps=3 format=3 uid="uid://do51yah8e5ywj"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_cg6vh"]
+albedo_color = Color(1, 0, 0, 1)
+
+[sub_resource type="PrismMesh" id="PrismMesh_6umxk"]
+material = SubResource("StandardMaterial3D_cg6vh")
+
+[node name="RepeatExploder" type="RepeatExploder"]
+
+[node name="Timer" type="Timer" parent="."]
+wait_time = 3.0
+autostart = true
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("PrismMesh_6umxk")
