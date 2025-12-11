@@ -88,5 +88,41 @@ impl RepeatExploder {
             .instantiate_as::<Explosion>();
         self.base_mut().add_child(&explosion);
     }
-
 }
+
+// A mine. Don't mine it
+#[derive(GodotClass)]
+#[class(base=Area3D, init)]
+pub struct Mine {
+    #[init(val=OnReady::from_loaded("res://explosion/rocket_explosion.tscn"))]
+    explosion_scene: OnReady<Gd<PackedScene>>,
+    base: Base<Area3D>,
+}
+
+#[godot_api]
+impl IArea3D for Mine {
+    fn ready(&mut self) {
+        self.signals()
+            .area_entered()
+            .connect_self(Self::on_stomped);
+    }
+}
+
+#[godot_api]
+impl Mine {
+    #[func]
+    fn on_stomped(&mut self, area: Gd<Area3D>) {
+        match area.try_cast::<Player>() {
+            Ok(_player) => {
+                let mut explosion = self.explosion_scene
+                    .instantiate_as::<Explosion>();
+                explosion.set_position(self.base().get_position());
+                self.base_mut().add_sibling(&explosion);
+                self.base_mut().queue_free();
+            }
+            Err(_) => {}
+        }
+    }
+}
+
+

@@ -1,13 +1,14 @@
 [gd_scene load_steps=11 format=3 uid="uid://drnw1j34w2nyq"]
 
 [ext_resource type="PackedScene" uid="uid://djue2jfmxkahd" path="res://player/player.tscn" id="1_ig7tw"]
-[ext_resource type="PackedScene" uid="uid://do51yah8e5ywj" path="res://explosion/repeat_exploder.tscn" id="2_0xm2m"]
+[ext_resource type="PackedScene" uid="uid://bwto3870082v7" path="res://explosion/mine.tscn" id="3_h2yge"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_7dm0k"]
 size = Vector3(32, 1, 32)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ig7tw"]
 albedo_color = Color(0.13725491, 0.3647059, 0.02745098, 1)
+roughness = 0.45
 
 [sub_resource type="BoxMesh" id="BoxMesh_ig7tw"]
 material = SubResource("StandardMaterial3D_ig7tw")
@@ -111,4 +112,25 @@ grow_vertical = 2
 [node name="Camera3D" type="Camera3D" parent="."]
 transform = Transform3D(0.3452818, 0.4202508, -0.8391482, 0, 0.89413863, 0.44779032, 0.9384991, -0.15461385, 0.30872977, -12.69988, 5.847363, 6.341898)
 
-[node name="RepeatExploder" parent="." instance=ExtResource("2_0xm2m")]
+[node name="mines" type="Node" parent="."]
+
+[node name="Mine" parent="mines" instance=ExtResource("3_h2yge")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.90015423, -5.1643095)
+
+[node name="Mine2" parent="mines" instance=ExtResource("3_h2yge")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.4013925, -0.90015423, 3.8796072)
+
+[node name="Mine6" parent="mines" instance=ExtResource("3_h2yge")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.58656454, -0.90015423, 4.3911657)
+
+[node name="Mine7" parent="mines" instance=ExtResource("3_h2yge")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.8039021, -0.90015423, 12.803911)
+
+[node name="Mine3" parent="mines" instance=ExtResource("3_h2yge")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.203873, -0.90015423, 3.8796072)
+
+[node name="Mine4" parent="mines" instance=ExtResource("3_h2yge")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.5240088, -0.90015423, 11.437915)
+
+[node name="Mine5" parent="mines" instance=ExtResource("3_h2yge")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.9875, -0.90015423, -7.9713354)

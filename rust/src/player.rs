@@ -101,7 +101,6 @@ impl Player {
 
     #[func]
     pub fn on_area_entered(&mut self, area: Gd<Area3D>) {
-        godot_print!("Area Entered");
         match area.try_cast::<Explosion>() {
             Ok(explosion) => {
                 if explosion.bind().get_time() < 0.2 {
@@ -109,8 +108,8 @@ impl Player {
                     let radius_vec = self.player_dynamic_body.get_position()
                         - explosion.get_position();
                     let new_velocity =
-                        radius_vec.normalized_or_zero() * 20.0
-                        + Vector3::UP * 15.0;
+                        radius_vec.normalized_or_zero() * 20.0;
+                        // + Vector3::UP * 15.0;
                     self.player_dynamic_body.set_linear_velocity(new_velocity);
                 }
             }

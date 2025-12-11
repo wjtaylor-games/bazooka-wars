@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=4 uid="uid://djue2jfmxkahd"]
+[gd_scene load_steps=12 format=4 uid="uid://djue2jfmxkahd"]
 
 [ext_resource type="Texture2D" uid="uid://c2kpf7po06cfx" path="res://player/player.png" id="1_oul6g"]
 [ext_resource type="Material" uid="uid://b3jhh4cetcqqr" path="res://player/bazooka.tres" id="1_rkbax"]
@@ -85,6 +85,10 @@ albedo_texture = ExtResource("1_oul6g")
 [sub_resource type="SphereMesh" id="SphereMesh_kqu6x"]
 material = SubResource("StandardMaterial3D_rkbax")
 
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_rkbax"]
+friction = 0.95
+bounce = 0.8
+
 [node name="Player" type="Player"]
 
 [node name="PlayerKinematicBody" type="PlayerKinematicBody" parent="."]
@@ -122,6 +126,7 @@ process_mode = 1
 top_level = true
 collision_layer = 32
 collision_mask = 33
+physics_material_override = SubResource("PhysicsMaterial_rkbax")
 
 [node name="SphereCollider" type="CollisionShape3D" parent="PlayerDynamicBody"]
 shape = SubResource("SphereShape3D_kqu6x")
