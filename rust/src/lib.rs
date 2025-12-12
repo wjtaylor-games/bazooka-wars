@@ -6,6 +6,7 @@ struct BazookaExtension;
 unsafe impl ExtensionLibrary for BazookaExtension {}
 
 
+mod lobby;
 mod player;
 mod explosion;
 mod rocket;
