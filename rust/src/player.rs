@@ -12,6 +12,7 @@ use godot::global::{wrapf};
 use num::clamp;
 
 use crate::explosion::Explosion;
+use crate::rocket::Rocket;
 
 // const SHOOT_SCALE: f32 = 2.0;
 // const CHAR_SCALE: Vector3 = Vector3::new(0.3, 0.3, 0.3);
@@ -28,6 +29,11 @@ pub struct Player {
     sphere_collider: OnReady<Gd<CollisionShape3D>>,
     #[init(node="RagdollTimer")]
     ragdoll_timer: OnReady<Gd<Timer>>,
+    #[init(val=OnReady::from_loaded("res://rocket/rocket.tscn"))]
+    rocket_scene: OnReady<Gd<PackedScene>>,
+    #[export]
+    #[init(val=15.0)]
+    rocket_init_vel: f32,
     #[export]
     #[init(val=false)]
     ragdoll: bool,
@@ -67,6 +73,10 @@ impl IArea3D for Player {
         if event.is_action_pressed("ragdoll") {
             godot_print!("ragdoll activated");
             self.begin_ragdoll();
+        }
+
+        if !self.ragdoll && event.is_action_pressed("shoot") {
+            self.shoot_rocket();
         }
     }
 
@@ -132,7 +142,6 @@ impl Player {
         self.end_ragdoll();
     }
 
-
     #[func]
     pub fn begin_ragdoll(&mut self) {
         self.ragdoll_timer.start();
@@ -151,6 +160,19 @@ impl Player {
         self.player_dynamic_body.set_visible(false);
         self.player_dynamic_body.set_physics_process(false);
     }
+
+    #[func]
+    pub fn shoot_rocket(&mut self) {
+        let mut rocket: Gd<Rocket> = self.rocket_scene.instantiate_as();
+        rocket.set_position(self.player_kinematic_body.bind().get_aim_position());
+        rocket.set_rotation(self.player_kinematic_body.bind().get_aim_rotation());
+        let rocket_basis = rocket.get_basis();
+        rocket.set_linear_velocity(
+            rocket_basis * Vector3::FORWARD * self.rocket_init_vel
+            + self.player_kinematic_body.get_velocity()
+        );
+        self.base_mut().add_sibling(&rocket);
+    }
 }
 
 
@@ -160,6 +182,7 @@ pub struct PlayerKinematicBody {
     camera: OnReady<Gd<Camera3D>>,
     bazooka: OnReady<Gd<Node3D>>,
     mesh: OnReady<Gd<MeshInstance3D>>,
+    rocket_mesh: OnReady<Gd<MeshInstance3D>>,
     parent_player: OnReady<Gd<Player>>,
     jumping: bool,
     #[export]
@@ -186,6 +209,7 @@ impl ICharacterBody3D for PlayerKinematicBody {
             camera: OnReady::from_node("PlayerCamera"),
             bazooka: OnReady::from_node("Bazooka"),
             mesh: OnReady::from_node("PlayerMesh"),
+            rocket_mesh: OnReady::from_node("Bazooka/RocketMesh"),
             parent_player: OnReady::from_node(".."),
             jumping: true,
             gravity: project_settings.get_setting("physics/3d/default_gravity").to::<f32>() *
@@ -285,6 +309,16 @@ impl PlayerKinematicBody {
     #[func]
     pub fn on_explosion(&mut self) {
 
+    }
+
+    #[func]
+    pub fn get_aim_position(&self) -> Vector3 {
+        self.rocket_mesh.get_global_position()
+    }
+
+    #[func]
+    pub fn get_aim_rotation(&self) -> Vector3 {
+        self.bazooka.get_global_rotation()
     }
 }
 

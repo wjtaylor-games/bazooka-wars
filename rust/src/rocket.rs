@@ -16,6 +16,9 @@ pub struct Rocket {
     #[export]
     #[init(val=15.0)]
     thrust: f32,
+    #[export]
+    #[init(val=20.0)]
+    lifetime: f32,
     base: Base<RigidBody3D>
 }
 
@@ -36,6 +39,12 @@ impl IRigidBody3D for Rocket {
         self.base_mut().set_linear_velocity(
             curr_vel + body_forward * thrust * delta / mass
         );
+
+        // Remove when lifetime exceeded
+        self.lifetime -= delta;
+        if self.lifetime < 0.0 {
+            self.base_mut().queue_free();
+        }
     }
 }
 
