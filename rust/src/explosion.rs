@@ -21,7 +21,6 @@ pub struct Explosion {
 impl IArea3D for Explosion {
     fn ready(&mut self) {
         // Explosion should explode one time
-        godot_print!("Time to explode");
         self.explosion_particles.set_one_shot(true);
         self.explosion_particles.set_emitting(true);
 
@@ -114,14 +113,19 @@ impl Mine {
     fn on_stomped(&mut self, area: Gd<Area3D>) {
         match area.try_cast::<Player>() {
             Ok(_player) => {
-                let mut explosion = self.explosion_scene
-                    .instantiate_as::<Explosion>();
-                explosion.set_position(self.base().get_position());
-                self.base_mut().add_sibling(&explosion);
-                self.base_mut().queue_free();
+                self.explode();
             }
             Err(_) => {}
         }
+    }
+
+    #[func]
+    pub fn explode(&mut self) {
+        let mut explosion = self.explosion_scene
+            .instantiate_as::<Explosion>();
+        explosion.set_position(self.base().get_position());
+        self.base_mut().add_sibling(&explosion);
+        self.base_mut().queue_free();
     }
 }
 
