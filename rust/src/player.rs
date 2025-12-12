@@ -29,6 +29,8 @@ pub struct Player {
     sphere_collider: OnReady<Gd<CollisionShape3D>>,
     #[init(node="RagdollTimer")]
     ragdoll_timer: OnReady<Gd<Timer>>,
+    #[init(node="ReloadTimer")]
+    reload_timer: OnReady<Gd<Timer>>,
     #[init(val=OnReady::from_loaded("res://rocket/rocket.tscn"))]
     rocket_scene: OnReady<Gd<PackedScene>>,
     #[export]
@@ -37,6 +39,8 @@ pub struct Player {
     #[export]
     #[init(val=false)]
     ragdoll: bool,
+    #[init(val=true)]
+    bazooka_loaded: bool,
     init_pos: Vector3,
     init_rot: Vector3,
     base: Base<Area3D>
@@ -99,6 +103,11 @@ impl IArea3D for Player {
             .signals()
             .timeout()
             .connect_other(&self.to_gd(), Self::end_ragdoll);
+
+        self.reload_timer
+            .signals()
+            .timeout()
+            .connect_other(&self.to_gd(), |this| {this.bazooka_loaded = true});
 
         self.signals()
             .area_entered()
@@ -163,15 +172,20 @@ impl Player {
 
     #[func]
     pub fn shoot_rocket(&mut self) {
-        let mut rocket: Gd<Rocket> = self.rocket_scene.instantiate_as();
-        rocket.set_position(self.player_kinematic_body.bind().get_aim_position());
-        rocket.set_rotation(self.player_kinematic_body.bind().get_aim_rotation());
-        let rocket_basis = rocket.get_basis();
-        rocket.set_linear_velocity(
-            rocket_basis * Vector3::FORWARD * self.rocket_init_vel
-            + self.player_kinematic_body.get_velocity()
-        );
-        self.base_mut().add_sibling(&rocket);
+        if self.bazooka_loaded {
+            let mut rocket: Gd<Rocket> = self.rocket_scene.instantiate_as();
+            rocket.set_position(self.player_kinematic_body.bind().get_aim_position());
+            rocket.set_rotation(self.player_kinematic_body.bind().get_aim_rotation());
+            let rocket_basis = rocket.get_basis();
+            rocket.set_linear_velocity(
+                rocket_basis * Vector3::FORWARD * self.rocket_init_vel
+                + self.player_kinematic_body.get_velocity()
+            );
+            self.base_mut().add_sibling(&rocket);
+
+            self.bazooka_loaded = false;
+            self.reload_timer.start();
+        }
     }
 }
 
