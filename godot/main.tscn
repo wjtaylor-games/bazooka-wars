@@ -1,6 +1,7 @@
-[gd_scene load_steps=11 format=3 uid="uid://drnw1j34w2nyq"]
+[gd_scene load_steps=12 format=3 uid="uid://drnw1j34w2nyq"]
 
 [ext_resource type="PackedScene" uid="uid://djue2jfmxkahd" path="res://player/player.tscn" id="1_ig7tw"]
+[ext_resource type="PackedScene" uid="uid://dbmej3tieaa2y" path="res://rocket/rocket.tscn" id="3_1bvp3"]
 [ext_resource type="PackedScene" uid="uid://bwto3870082v7" path="res://explosion/mine.tscn" id="3_h2yge"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_7dm0k"]
@@ -134,3 +135,30 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.5240088, -0.90015423, 11.4
 
 [node name="Mine5" parent="mines" instance=ExtResource("3_h2yge")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.9875, -0.90015423, -7.9713354)
+
+[node name="Rocket" parent="." instance=ExtResource("3_1bvp3")]
+transform = Transform3D(-0.9949142, 0, -0.100726455, 0.019267833, 0.9815338, -0.19031583, 0.098866425, -0.1912887, -0.97654194, 0, 2.0739512, -10)
+
+[node name="Rocket3" parent="." instance=ExtResource("3_1bvp3")]
+transform = Transform3D(-0.9949142, 0, -0.100726455, 0.019267833, 0.9815338, -0.19031583, 0.098866425, -0.1912887, -0.97654194, 1.3176799, 2.0739512, -10)
+
+[node name="Rocket4" parent="." instance=ExtResource("3_1bvp3")]
+transform = Transform3D(-0.9949142, 0, -0.100726455, 0.019267833, 0.9815338, -0.19031583, 0.098866425, -0.1912887, -0.97654194, 2.5179114, 2.0739512, -10)
+
+[node name="Rocket5" parent="." instance=ExtResource("3_1bvp3")]
+transform = Transform3D(-0.9949142, 0, -0.100726455, 0.019267833, 0.9815338, -0.19031583, 0.098866425, -0.1912887, -0.97654194, 4.1235366, 2.0739512, -10)
+
+[node name="Rocket6" parent="." instance=ExtResource("3_1bvp3")]
+transform = Transform3D(-0.9949142, 0, -0.100726455, 0.019267833, 0.9815338, -0.19031583, 0.098866425, -0.1912887, -0.97654194, -2.5304713, 2.0739512, -10)
+
+[node name="Rocket7" parent="." instance=ExtResource("3_1bvp3")]
+transform = Transform3D(-0.9949142, 0, -0.100726455, 0.019267833, 0.9815338, -0.19031583, 0.098866425, -0.1912887, -0.97654194, -4.136167, 2.0739512, -10)
+
+[node name="Rocket8" parent="." instance=ExtResource("3_1bvp3")]
+transform = Transform3D(-0.9949142, 0, -0.100726455, 0.019267833, 0.9815338, -0.19031583, 0.098866425, -0.1912887, -0.97654194, -5.3932743, 2.0739512, -10)
+
+[node name="Rocket9" parent="." instance=ExtResource("3_1bvp3")]
+transform = Transform3D(-0.9949142, 0, -0.100726455, 0.019267833, 0.9815338, -0.19031583, 0.098866425, -0.1912887, -0.97654194, -6.5198026, 2.0739512, -10)
+
+[node name="Rocket2" parent="." instance=ExtResource("3_1bvp3")]
+transform = Transform3D(-0.9949142, 0, -0.100726455, 0.019267833, 0.9815338, -0.19031583, 0.098866425, -0.1912887, -0.97654194, -1.2947502, 2.0739512, -10)

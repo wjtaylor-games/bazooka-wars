@@ -32,8 +32,9 @@ impl IRigidBody3D for Rocket {
         let curr_vel = self.base().get_linear_velocity();
         let body_forward = self.base().get_basis() * Vector3::FORWARD;
         let thrust = self.thrust;
+        let mass = self.base().get_mass();
         self.base_mut().set_linear_velocity(
-            curr_vel + body_forward * thrust * delta
+            curr_vel + body_forward * thrust * delta / mass
         );
     }
 }
