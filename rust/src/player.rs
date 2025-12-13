@@ -74,13 +74,15 @@ impl IArea3D for Player {
     }
 
     fn input(&mut self, event: Gd<InputEvent>) {
-        if event.is_action_pressed("ragdoll") {
-            godot_print!("ragdoll activated");
-            self.begin_ragdoll();
-        }
+        if self.base().is_multiplayer_authority() {
+            if event.is_action_pressed("ragdoll") {
+                godot_print!("ragdoll activated");
+                self.begin_ragdoll();
+            }
 
-        if !self.ragdoll && event.is_action_pressed("shoot") {
-            self.shoot_rocket();
+            if !self.ragdoll && event.is_action_pressed("shoot") {
+                self.shoot_rocket();
+            }
         }
     }
 
@@ -151,8 +153,12 @@ impl Player {
         self.end_ragdoll();
     }
 
-    #[func]
     pub fn begin_ragdoll(&mut self) {
+        self.base_mut().rpc("_begin_ragdoll", vslice![]);
+    }
+
+    #[rpc(any_peer, call_local)]
+    fn _begin_ragdoll(&mut self) {
         self.ragdoll_timer.start();
         self.ragdoll = true;
         self.player_kinematic_body.set_visible(false);
@@ -161,8 +167,12 @@ impl Player {
         self.player_dynamic_body.set_physics_process(true);
     }
 
-    #[func]
     pub fn end_ragdoll(&mut self) {
+        self.base_mut().rpc("_end_ragdoll", vslice![]);
+    }
+
+    #[rpc(any_peer, call_local)]
+    fn _end_ragdoll(&mut self) {
         self.ragdoll = false;
         self.player_kinematic_body.set_visible(true);
         self.player_kinematic_body.set_physics_process(true);
@@ -186,6 +196,11 @@ impl Player {
             self.bazooka_loaded = false;
             self.reload_timer.start();
         }
+    }
+
+    #[func]
+    pub fn set_camera_current(&mut self, enabled: bool) {
+        self.player_kinematic_body.bind_mut().set_camera_current(enabled);
     }
 }
 
@@ -243,57 +258,61 @@ impl ICharacterBody3D for PlayerKinematicBody {
     }
 
     fn physics_process(&mut self, delta: f32) {
-        
-        let mut velocity = self.base().get_velocity();
-        velocity += self.gravity * delta;
-        let mut vertical_velocity = velocity.y;
-        let mut horizontal_velocity = Vector3::new(velocity.x, 0.0, velocity.z);
 
+        if self.base().is_multiplayer_authority() {
+            let mut velocity = self.base().get_velocity();
+            velocity += self.gravity * delta;
+            let mut vertical_velocity = velocity.y;
+            let mut horizontal_velocity = Vector3::new(velocity.x, 0.0, velocity.z);
 
-        let basis = self.base().get_basis();
-        let input = Input::singleton();
-        let movement_vec2 = input.get_vector("left", "right", "forward", "back");
-        let mut movement_direction =
-            basis * Vector3::new(movement_vec2.x, 0.0, movement_vec2.y);
-        movement_direction.y = 0.0;
-        let movement_direction = movement_direction.normalized_or_zero();
+            let basis = self.base().get_basis();
+            let input = Input::singleton();
+            let movement_vec2 = input.get_vector("left", "right", "forward", "back");
+            let mut movement_direction =
+                basis * Vector3::new(movement_vec2.x, 0.0, movement_vec2.y);
+            movement_direction.y = 0.0;
+            let movement_direction = movement_direction.normalized_or_zero();
 
-        let jump_attempt: bool = input.is_action_pressed("jump");
+            let jump_attempt: bool = input.is_action_pressed("jump");
 
-        if self.base().is_on_floor() {
-            self.jumping = false;
-        } else {
-            self.jumping = true;
-        }
-
-        if movement_direction.length() > 0.1 {
-            // We are actually walking
-            horizontal_velocity += movement_direction * self.accel * delta;
-            horizontal_velocity = horizontal_velocity.limit_length(Some(self.max_speed));
-        } else {
-            // Not walking, slow to a stop
-            let mut horizontal_speed = horizontal_velocity.length();
-            horizontal_speed -= self.deaccel * delta;
-            if horizontal_speed < 0.0 {
-                horizontal_speed = 0.0;
+            if self.base().is_on_floor() {
+                self.jumping = false;
+            } else {
+                self.jumping = true;
             }
-            horizontal_velocity = horizontal_velocity.normalized_or_zero() * horizontal_speed;
-        }
 
-        if !self.jumping && jump_attempt {
-            vertical_velocity = self.jump_velocity;
-            self.jumping = true;
-        }
+            if movement_direction.length() > 0.1 {
+                // We are actually walking
+                horizontal_velocity += movement_direction * self.accel * delta;
+                horizontal_velocity = horizontal_velocity.limit_length(Some(self.max_speed));
+            } else {
+                // Not walking, slow to a stop
+                let mut horizontal_speed = horizontal_velocity.length();
+                horizontal_speed -= self.deaccel * delta;
+                if horizontal_speed < 0.0 {
+                    horizontal_speed = 0.0;
+                }
+                horizontal_velocity = horizontal_velocity.normalized_or_zero() * horizontal_speed;
+            }
 
-        self.base_mut().set_velocity(
-            horizontal_velocity + Vector3::UP * vertical_velocity
-        );
+            if !self.jumping && jump_attempt {
+                vertical_velocity = self.jump_velocity;
+                self.jumping = true;
+            }
+
+            let new_velocity = horizontal_velocity + Vector3::UP * vertical_velocity;
+            let args = vslice![self.jumping, new_velocity];
+            self.base_mut().rpc("update_jumping_and_velocity", args);
+            let args = vslice![self.base().get_position()];
+            self.base_mut().rpc("update_position", args);
+        }
 
         self.base_mut().move_and_slide();
     }
     
     fn input(&mut self, event: Gd<InputEvent>) {
-        if Input::singleton().get_mouse_mode() == MouseMode::CAPTURED {
+        if self.base().is_multiplayer_authority()
+                && Input::singleton().get_mouse_mode() == MouseMode::CAPTURED {
             match event.try_cast::<InputEventMouseMotion>() {
                 Ok(e) => {
                     // Set the Kinematic Player yaw rotation
@@ -302,15 +321,15 @@ impl ICharacterBody3D for PlayerKinematicBody {
                     rotation.y = wrapf(
                         (rotation.y - motion_vec.x) as f64,
                         0.0, TAU as f64) as f32;
-                    self.base_mut().set_rotation(rotation);
 
                     // Set the Camera pitch rotation
                     let mut cam_rotation = self.camera.get_rotation();
                     cam_rotation.x = clamp::<f32>(cam_rotation.x - motion_vec.y,
                         -PI/2.0, PI/2.0);
-                    self.camera.set_rotation(cam_rotation);
-                    self.bazooka.set_rotation(cam_rotation);
-                    self.mesh.set_rotation(cam_rotation);
+                    self.base_mut().rpc(
+                        "update_rotations",
+                        vslice![rotation, cam_rotation]
+                    );
                 }
                 Err(_) => {}
             }
@@ -320,9 +339,24 @@ impl ICharacterBody3D for PlayerKinematicBody {
 
 #[godot_api]
 impl PlayerKinematicBody {
-    #[func]
-    pub fn on_explosion(&mut self) {
+    #[rpc(any_peer, call_local)]
+    pub fn update_jumping_and_velocity(&mut self, jumping: bool, velocity: Vector3) {
+        self.jumping = jumping;
+        self.base_mut().set_velocity(velocity);
+    }
 
+    // This is called for remote, not local
+    #[rpc(any_peer, call_remote)]
+    pub fn update_position(&mut self, position: Vector3) {
+        self.base_mut().set_position(position);
+    }
+
+    #[rpc(any_peer, call_local)]
+    pub fn update_rotations(&mut self, yaw_rotation: Vector3, cam_rotation: Vector3) {
+        self.base_mut().set_rotation(yaw_rotation);
+        self.camera.set_rotation(cam_rotation);
+        self.bazooka.set_rotation(cam_rotation);
+        self.mesh.set_rotation(cam_rotation);
     }
 
     #[func]
@@ -334,6 +368,11 @@ impl PlayerKinematicBody {
     pub fn get_aim_rotation(&self) -> Vector3 {
         self.bazooka.get_global_rotation()
     }
+
+    #[func]
+    pub fn set_camera_current(&mut self, enabled: bool) {
+        self.camera.set_current(enabled);
+    }
 }
 
 #[derive(GodotClass)]
@@ -341,3 +380,4 @@ impl PlayerKinematicBody {
 pub struct PlayerDynamicBody {
     base: Base<RigidBody3D>
 }
+

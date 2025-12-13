@@ -8,5 +8,6 @@ unsafe impl ExtensionLibrary for BazookaExtension {}
 
 mod lobby;
 mod player;
+mod player_spawner;
 mod explosion;
 mod rocket;

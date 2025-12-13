@@ -33,6 +33,16 @@ sky = SubResource("Sky_0xm2m")
 
 [node name="Game" type="Node3D"]
 
+[node name="TwoPlayers" type="TwoPlayers" parent="." node_paths=PackedStringArray("host_player", "client_player")]
+host_player = NodePath("HostPlayer")
+client_player = NodePath("ClientPlayer")
+
+[node name="HostPlayer" parent="TwoPlayers" instance=ExtResource("1_ig7tw")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.1592293, 8.575236)
+
+[node name="ClientPlayer" parent="TwoPlayers" instance=ExtResource("1_ig7tw")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4149446, -2.3533168)
+
 [node name="Ground" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.3771799, 0)
 collision_layer = 49
@@ -56,9 +66,6 @@ shape = SubResource("BoxShape3D_0xm2m")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Wall"]
 mesh = SubResource("BoxMesh_h2yge")
-
-[node name="Player" parent="." instance=ExtResource("1_ig7tw")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.1592293, 8.575236)
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_h2yge")
