@@ -116,6 +116,52 @@ offset_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
+[node name="PauseMenu" type="PauseMenu" parent="." node_paths=PackedStringArray("unpause_button")]
+unpause_button = NodePath("CenterContainer/ResumeButton")
+paused = true
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ColorRect" type="ColorRect" parent="PauseMenu"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.39215687)
+
+[node name="CenterContainer" type="CenterContainer" parent="PauseMenu"]
+layout_mode = 1
+anchors_preset = 13
+anchor_left = 0.5
+anchor_right = 0.5
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ResumeButton" type="Button" parent="PauseMenu/CenterContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Resume"
+
+[node name="Label" type="Label" parent="PauseMenu"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -101.0
+offset_right = 101.0
+offset_bottom = 218.0
+grow_horizontal = 2
+theme_override_font_sizes/font_size = 38
+text = "Paused"
+horizontal_alignment = 1
+vertical_alignment = 2
+
 [node name="Camera3D" type="Camera3D" parent="."]
 transform = Transform3D(0.3452818, 0.4202508, -0.8391482, 0, 0.89413863, 0.44779032, 0.9384991, -0.15461385, 0.30872977, -12.69988, 5.847363, 6.341898)
 

@@ -74,7 +74,8 @@ impl IArea3D for Player {
     }
 
     fn input(&mut self, event: Gd<InputEvent>) {
-        if self.base().is_multiplayer_authority() {
+        if self.base().is_multiplayer_authority() 
+                && Input::singleton().get_mouse_mode() == MouseMode::CAPTURED {
             if event.is_action_pressed("ragdoll") {
                 godot_print!("ragdoll activated");
                 self.begin_ragdoll();
@@ -122,19 +123,16 @@ impl Player {
 
     #[func]
     pub fn on_area_entered(&mut self, area: Gd<Area3D>) {
-        match area.try_cast::<Explosion>() {
-            Ok(explosion) => {
-                if explosion.bind().get_time() < 0.2 {
-                    self.begin_ragdoll();
-                    let radius_vec = self.player_dynamic_body.get_position()
-                        - explosion.get_position();
-                    let new_velocity =
-                        radius_vec.normalized_or_zero() * 20.0;
-                        // + Vector3::UP * 15.0;
-                    self.player_dynamic_body.set_linear_velocity(new_velocity);
-                }
+        if let Ok(explosion) = area.try_cast::<Explosion>() {
+            if explosion.bind().get_time() < 0.2 {
+                self.begin_ragdoll();
+                let radius_vec = self.player_dynamic_body.get_position()
+                    - explosion.get_position();
+                let new_velocity =
+                    radius_vec.normalized_or_zero() * 20.0;
+                    // + Vector3::UP * 15.0;
+                self.player_dynamic_body.set_linear_velocity(new_velocity);
             }
-            Err(_) => {}
         }
     }
 
@@ -268,15 +266,28 @@ impl ICharacterBody3D for PlayerKinematicBody {
             let mut vertical_velocity = velocity.y;
             let mut horizontal_velocity = Vector3::new(velocity.x, 0.0, velocity.z);
 
-            let basis = self.base().get_basis();
+            // Declare input commands
+            let movement_vec2: Vector2;
+            let jump_attempt: bool;
+
+            // Get inputs, if not paused
             let input = Input::singleton();
-            let movement_vec2 = input.get_vector("left", "right", "forward", "back");
+            if input.get_mouse_mode() == MouseMode::CAPTURED {
+                // Not paused
+                movement_vec2 = input.get_vector("left", "right", "forward", "back");
+                jump_attempt = input.is_action_pressed("jump");
+            } else {
+                // Paused
+                movement_vec2 = Vector2::ZERO;
+                jump_attempt = false;
+            }
+
+            let basis = self.base().get_basis();
             let mut movement_direction =
                 basis * Vector3::new(movement_vec2.x, 0.0, movement_vec2.y);
             movement_direction.y = 0.0;
             let movement_direction = movement_direction.normalized_or_zero();
 
-            let jump_attempt: bool = input.is_action_pressed("jump");
 
             if self.base().is_on_floor() {
                 self.jumping = false;
@@ -316,25 +327,22 @@ impl ICharacterBody3D for PlayerKinematicBody {
     fn input(&mut self, event: Gd<InputEvent>) {
         if self.base().is_multiplayer_authority()
                 && Input::singleton().get_mouse_mode() == MouseMode::CAPTURED {
-            match event.try_cast::<InputEventMouseMotion>() {
-                Ok(e) => {
-                    // Set the Kinematic Player yaw rotation
-                    let motion_vec = e.get_relative() * self.mouse_sensitivity;
-                    let mut rotation = self.base().get_rotation();
-                    rotation.y = wrapf(
-                        (rotation.y - motion_vec.x) as f64,
-                        0.0, TAU as f64) as f32;
+            if let Ok(e) = event.try_cast::<InputEventMouseMotion>() {
+                // Set the Kinematic Player yaw rotation
+                let motion_vec = e.get_relative() * self.mouse_sensitivity;
+                let mut rotation = self.base().get_rotation();
+                rotation.y = wrapf(
+                    (rotation.y - motion_vec.x) as f64,
+                    0.0, TAU as f64) as f32;
 
-                    // Set the Camera pitch rotation
-                    let mut cam_rotation = self.camera.get_rotation();
-                    cam_rotation.x = clamp::<f32>(cam_rotation.x - motion_vec.y,
-                        -PI/2.0, PI/2.0);
-                    self.base_mut().rpc(
-                        "update_rotations",
-                        vslice![rotation, cam_rotation]
-                    );
-                }
-                Err(_) => {}
+                // Set the Camera pitch rotation
+                let mut cam_rotation = self.camera.get_rotation();
+                cam_rotation.x = clamp::<f32>(cam_rotation.x - motion_vec.y,
+                    -PI/2.0, PI/2.0);
+                self.base_mut().rpc(
+                    "update_rotations",
+                    vslice![rotation, cam_rotation]
+                );
             }
         }
     }
