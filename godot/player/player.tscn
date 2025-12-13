@@ -105,7 +105,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.2725258)
 current = true
 
 [node name="Bazooka" type="Node3D" parent="PlayerKinematicBody"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.66112757, 0.12717438, 0)
+transform = Transform3D(0.99904823, 0, 0.043619387, 0, 1, 0, -0.043619387, 0, 0.99904823, 0.66112757, 0.12717438, 0)
 
 [node name="BazookaMesh" type="MeshInstance3D" parent="PlayerKinematicBody/Bazooka"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.20873073)

@@ -36,8 +36,6 @@ pub struct Player {
     #[export]
     #[init(val=15.0)]
     rocket_init_vel: f32,
-    #[export]
-    #[init(val=false)]
     ragdoll: bool,
     #[init(val=true)]
     bazooka_loaded: bool,
@@ -68,9 +66,10 @@ impl IArea3D for Player {
         self.base_mut().set_position(pos);
         
         // Out of bounds condition
-        if pos.y < -10.0 {
+        if self.base().is_multiplayer_authority() && pos.y < -10.0 {
             self.reset_pos();
         }
+        self.sync_ragdoll(self.ragdoll);
     }
 
     fn input(&mut self, event: Gd<InputEvent>) {
@@ -78,7 +77,7 @@ impl IArea3D for Player {
                 && Input::singleton().get_mouse_mode() == MouseMode::CAPTURED {
             if event.is_action_pressed("ragdoll") {
                 godot_print!("ragdoll activated");
-                self.begin_ragdoll();
+                self.base_mut().rpc("begin_ragdoll", vslice![]);
             }
 
             if !self.ragdoll && event.is_action_pressed("shoot") {
@@ -96,16 +95,14 @@ impl IArea3D for Player {
         self.player_kinematic_body.set_position(pos);
         self.player_dynamic_body.set_rotation(rot);
         self.player_kinematic_body.set_rotation(rot);
-        if self.ragdoll {
-            self.begin_ragdoll();
-        } else {
-            self.end_ragdoll();
-        }
+
+        self.end_ragdoll();
+        self.base_mut().rpc("end_ragdoll", vslice![]);
 
         self.ragdoll_timer
             .signals()
             .timeout()
-            .connect_other(&self.to_gd(), Self::end_ragdoll);
+            .connect_other(&self.to_gd(), Self::rpc_end_ragdoll);
 
         self.reload_timer
             .signals()
@@ -125,7 +122,14 @@ impl Player {
     pub fn on_area_entered(&mut self, area: Gd<Area3D>) {
         if let Ok(explosion) = area.try_cast::<Explosion>() {
             if explosion.bind().get_time() < 0.2 {
-                self.begin_ragdoll();
+                if self.base().is_multiplayer_authority() {
+                    // activate ragdoll across network
+                    self.base_mut().rpc("begin_ragdoll", vslice![]);
+                } else {
+                    // only activate ragdoll here, until corrected
+                    // by a sync
+                    self.begin_ragdoll();
+                }
                 let radius_vec = self.player_dynamic_body.get_position()
                     - explosion.get_position();
                 let new_velocity =
@@ -148,15 +152,11 @@ impl Player {
         self.player_dynamic_body.set_linear_velocity(Vector3::ZERO);
         self.player_kinematic_body.set_velocity(Vector3::ZERO);
         self.player_dynamic_body.set_angular_velocity(Vector3::ZERO);
-        self.end_ragdoll();
+        self.base_mut().rpc("end_ragdoll", vslice![]);
     }
 
-    pub fn begin_ragdoll(&mut self) {
-        self.base_mut().rpc("_begin_ragdoll", vslice![]);
-    }
-
-    #[rpc(any_peer, call_local)]
-    fn _begin_ragdoll(&mut self) {
+    #[rpc(authority, call_local)]
+    fn begin_ragdoll(&mut self) {
         self.ragdoll_timer.start();
         self.ragdoll = true;
         self.player_kinematic_body.set_visible(false);
@@ -165,17 +165,26 @@ impl Player {
         self.player_dynamic_body.set_physics_process(true);
     }
 
-    pub fn end_ragdoll(&mut self) {
-        self.base_mut().rpc("_end_ragdoll", vslice![]);
+    pub fn rpc_end_ragdoll(&mut self) {
+        self.base_mut().rpc("end_ragdoll", vslice![]);
     }
 
-    #[rpc(any_peer, call_local)]
-    fn _end_ragdoll(&mut self) {
+    #[rpc(authority, call_local)]
+    fn end_ragdoll(&mut self) {
         self.ragdoll = false;
         self.player_kinematic_body.set_visible(true);
         self.player_kinematic_body.set_physics_process(true);
         self.player_dynamic_body.set_visible(false);
         self.player_dynamic_body.set_physics_process(false);
+    }
+
+    #[rpc(authority, call_remote)]
+    fn sync_ragdoll(&mut self, ragdoll: bool) {
+        if self.ragdoll && !ragdoll {
+            self.end_ragdoll();
+        } else if !self.ragdoll && ragdoll {
+            self.begin_ragdoll();
+        }
     }
 
     #[rpc(any_peer, call_local)]
@@ -366,8 +375,9 @@ impl PlayerKinematicBody {
     pub fn update_rotations(&mut self, yaw_rotation: Vector3, cam_rotation: Vector3) {
         self.base_mut().set_rotation(yaw_rotation);
         self.camera.set_rotation(cam_rotation);
-        self.bazooka.set_rotation(cam_rotation);
         self.mesh.set_rotation(cam_rotation);
+        let bazooka_rotation = cam_rotation + Vector3::UP * self.bazooka.get_rotation().y;
+        self.bazooka.set_rotation(bazooka_rotation);
     }
 
     #[func]
