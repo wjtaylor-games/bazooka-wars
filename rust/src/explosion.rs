@@ -113,13 +113,14 @@ impl Mine {
     fn on_stomped(&mut self, area: Gd<Area3D>) {
         match area.try_cast::<Player>() {
             Ok(_player) => {
-                self.explode();
+                let args = vslice![];
+                self.base_mut().rpc("explode", args);
             }
             Err(_) => {}
         }
     }
 
-    #[func]
+    #[rpc(any_peer, call_local)]
     pub fn explode(&mut self) {
         let mut explosion = self.explosion_scene
             .instantiate_as::<Explosion>();
