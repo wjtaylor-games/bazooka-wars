@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3 uid="uid://drnw1j34w2nyq"]
+[gd_scene load_steps=11 format=3 uid="uid://bfd2lo232dfv"]
 
 [ext_resource type="PackedScene" uid="uid://djue2jfmxkahd" path="res://player/player.tscn" id="1_ig7tw"]
 [ext_resource type="PackedScene" uid="uid://bwto3870082v7" path="res://explosion/mine.tscn" id="3_h2yge"]
@@ -31,7 +31,7 @@ sky_material = SubResource("ProceduralSkyMaterial_ig7tw")
 background_mode = 2
 sky = SubResource("Sky_0xm2m")
 
-[node name="Main" type="Node3D"]
+[node name="Game" type="Node3D"]
 
 [node name="Ground" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.3771799, 0)

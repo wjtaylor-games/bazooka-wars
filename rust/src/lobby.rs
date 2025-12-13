@@ -49,7 +49,7 @@ impl IPanel for Lobby {
             .builder()
             .connect_other_gd(&gd_ref, |mut this: Gd<Self>, _id: i64| {
                 godot_print!("Someone connected, start the game!");
-                let game = load::<PackedScene>("res://main.tscn").instantiate_as::<Node3D>();
+                let game = load::<PackedScene>("res://game.tscn").instantiate_as::<Node3D>();
                 // Connect deferred so we can safely erase it from the callback.
                 // game.signals()
                 //     .game_finished()
@@ -130,10 +130,10 @@ impl Lobby {
     }
 
     fn end_game(&mut self, with_error: &str) {
-        if self.base().has_node("/root/Main") {
+        if self.base().has_node("/root/Game") {
             // Erase immediately, otherwise network might show
             // errors (this is why we connected deferred above).
-            self.base().get_node_as::<Node>("/root/Main").free();
+            self.base().get_node_as::<Node>("/root/Game").free();
             self.base_mut().show();
         }
 
