@@ -81,7 +81,7 @@ impl IArea3D for Player {
             }
 
             if !self.ragdoll && event.is_action_pressed("shoot") {
-                self.shoot_rocket();
+                self.base_mut().rpc("shoot_rocket", vslice![]);
             }
         }
     }
@@ -180,10 +180,13 @@ impl Player {
         self.player_dynamic_body.set_physics_process(false);
     }
 
-    #[func]
+    #[rpc(any_peer, call_local)]
     pub fn shoot_rocket(&mut self) {
         if self.bazooka_loaded {
             let mut rocket: Gd<Rocket> = self.rocket_scene.instantiate_as();
+            rocket.set_multiplayer_authority(
+                self.base().get_multiplayer_authority()
+            );
             rocket.set_position(self.player_kinematic_body.bind().get_aim_position());
             rocket.set_rotation(self.player_kinematic_body.bind().get_aim_rotation());
             let rocket_basis = rocket.get_basis();
@@ -381,3 +384,35 @@ pub struct PlayerDynamicBody {
     base: Base<RigidBody3D>
 }
 
+#[godot_api]
+impl IRigidBody3D for PlayerDynamicBody {
+    fn physics_process(&mut self, _delta: f32) {
+        if self.base().is_multiplayer_authority() {
+            let args = vslice![
+                self.base().get_position(),
+                self.base().get_rotation(),
+                self.base().get_linear_velocity(),
+                self.base().get_angular_velocity(),
+            ];
+            self.base_mut().rpc("update_states", args);
+        }
+    }
+}
+
+#[godot_api]
+impl PlayerDynamicBody {
+
+    // This is called for remote, not local
+    #[rpc(any_peer, call_remote)]
+    pub fn update_states(&mut self,
+                         position: Vector3,
+                         rotation: Vector3,
+                         velocity: Vector3,
+                         ang_velocity: Vector3,
+                         ) {
+        self.base_mut().set_position(position);
+        self.base_mut().set_rotation(rotation);
+        self.base_mut().set_linear_velocity(velocity);
+        self.base_mut().set_angular_velocity(ang_velocity);
+    }
+}
