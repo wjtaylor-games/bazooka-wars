@@ -92,6 +92,7 @@ bounce = 0.8
 [node name="Player" type="Player"]
 
 [node name="PlayerKinematicBody" type="PlayerKinematicBody" parent="."]
+jump_velocity = 6.0
 process_mode = 1
 top_level = true
 collision_layer = 16

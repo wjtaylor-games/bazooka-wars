@@ -67,7 +67,7 @@ impl IArea3D for Player {
         
         // Out of bounds condition
         if self.base().is_multiplayer_authority() && pos.y < -10.0 {
-            self.reset_pos();
+            self.base_mut().rpc("reset_pos", vslice![]);
         }
         self.sync_ragdoll(self.ragdoll);
     }
@@ -97,12 +97,11 @@ impl IArea3D for Player {
         self.player_kinematic_body.set_rotation(rot);
 
         self.end_ragdoll();
-        self.base_mut().rpc("end_ragdoll", vslice![]);
 
         self.ragdoll_timer
             .signals()
             .timeout()
-            .connect_other(&self.to_gd(), Self::rpc_end_ragdoll);
+            .connect_other(&self.to_gd(), Self::end_ragdoll);
 
         self.reload_timer
             .signals()
@@ -140,7 +139,7 @@ impl Player {
         }
     }
 
-    #[func]
+    #[rpc(authority, call_local)]
     pub fn reset_pos(&mut self) {
         // Reset to initial position
         let pos = self.init_pos;
@@ -152,7 +151,7 @@ impl Player {
         self.player_dynamic_body.set_linear_velocity(Vector3::ZERO);
         self.player_kinematic_body.set_velocity(Vector3::ZERO);
         self.player_dynamic_body.set_angular_velocity(Vector3::ZERO);
-        self.base_mut().rpc("end_ragdoll", vslice![]);
+        self.end_ragdoll();
     }
 
     #[rpc(authority, call_local)]
@@ -163,10 +162,6 @@ impl Player {
         self.player_kinematic_body.set_physics_process(false);
         self.player_dynamic_body.set_visible(true);
         self.player_dynamic_body.set_physics_process(true);
-    }
-
-    pub fn rpc_end_ragdoll(&mut self) {
-        self.base_mut().rpc("end_ragdoll", vslice![]);
     }
 
     #[rpc(authority, call_local)]
