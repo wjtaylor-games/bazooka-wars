@@ -416,7 +416,7 @@ impl IRigidBody3D for PlayerDynamicBody {
 impl PlayerDynamicBody {
 
     // This is called for remote, not local
-    #[rpc(any_peer, call_remote)]
+    #[rpc(authority, call_remote)]
     pub fn update_states(&mut self,
                          position: Vector3,
                          rotation: Vector3,

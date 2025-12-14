@@ -111,16 +111,15 @@ impl IArea3D for Mine {
 impl Mine {
     #[func]
     fn on_stomped(&mut self, area: Gd<Area3D>) {
-        match area.try_cast::<Player>() {
-            Ok(_player) => {
+        if self.base().is_multiplayer_authority() {
+            if let Ok(_player) = area.try_cast::<Player>() {
                 let args = vslice![];
                 self.base_mut().rpc("explode", args);
             }
-            Err(_) => {}
         }
     }
 
-    #[rpc(any_peer, call_local)]
+    #[rpc(authority, call_local)]
     pub fn explode(&mut self) {
         let mut explosion = self.explosion_scene
             .instantiate_as::<Explosion>();
