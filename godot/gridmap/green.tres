@@ -1,0 +1,6 @@
+[gd_resource type="StandardMaterial3D" format=3 uid="uid://bskmvt75ci8f5"]
+
+[resource]
+albedo_color = Color(0.13725491, 0.3647059, 0.02745098, 1)
+roughness = 0.85
+uv1_scale = Vector3(-10, -10, -10)
