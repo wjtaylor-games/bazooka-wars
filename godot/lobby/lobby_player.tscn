@@ -1,8 +1,10 @@
 [gd_scene format=3 uid="uid://cksyyy1ig36j0"]
 
-[node name="LobbyPlayer" type="Control"]
+[node name="LobbyPlayer" type="LobbyPlayer" node_paths=PackedStringArray("name_label", "color_picker")]
+name_label = NodePath("Panel/VBoxContainer/NameLabel")
+color_picker = NodePath("Panel/VBoxContainer/ColorPickerButton")
 custom_minimum_size = Vector2(180, 150)
-layout_mode = 3
+anchors_preset = -1
 anchor_left = 0.3732639
 anchor_top = 0.36882716
 anchor_right = 0.5529514

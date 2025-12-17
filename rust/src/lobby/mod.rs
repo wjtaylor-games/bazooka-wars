@@ -2,23 +2,36 @@ use godot::classes::enet_connection::CompressionMode;
 #[allow(unused_imports)]
 use godot::classes::object::ConnectFlags;
 use godot::classes::{
-    Button, ENetMultiplayerPeer, IPanel, Label, LineEdit, LinkButton, Os, Panel, ProjectSettings,
+    Button, ENetMultiplayerPeer, Label, LineEdit, LinkButton, ProjectSettings,
     Control, IControl,
 };
 use godot::global::Error;
 use godot::prelude::*;
 
 mod lobby_player;
+use lobby_player::LobbyPlayer;
 
 const DEFAULT_PORT: i32 = 8910;
 
 #[derive(GodotClass)]
-#[class(init, base=Panel)]
+#[class(init, base=Control)]
 pub struct Lobby {
+    #[init(val=OnReady::from_loaded("res://lobby/lobby_player.tscn"))]
+    lobby_player_scene: OnReady<Gd<PackedScene>>,
+    #[export]
+    join_panel: OnEditor<Gd<Control>>,
+    #[export]
+    created_lobby: OnEditor<Gd<Control>>,
+    #[export]
+    players_joined_container: OnEditor<Gd<Control>>,
+    #[export]
+    name_input: OnEditor<Gd<LineEdit>>,
     #[export]
     address: OnEditor<Gd<LineEdit>>,
     #[export]
     host_button: OnEditor<Gd<Button>>,
+    #[export]
+    start_game_button: OnEditor<Gd<Button>>,
     #[export]
     join_button: OnEditor<Gd<Button>>,
     #[export]
@@ -30,11 +43,11 @@ pub struct Lobby {
     #[export]
     find_public_ip_button: OnEditor<Gd<LinkButton>>,
     peer: Option<Gd<ENetMultiplayerPeer>>,
-    base: Base<Panel>,
+    base: Base<Control>,
 }
 
 #[godot_api]
-impl IPanel for Lobby {
+impl IControl for Lobby {
     fn ready(&mut self) {
         /*
         # Connect all the callbacks related to networking.
@@ -46,30 +59,32 @@ impl IPanel for Lobby {
         */
         let multiplayer = self.base().get_multiplayer().unwrap();
         let gd_ref = self.to_gd();
+
+        // Shows the main menu
+        self.hide_lobby();
+
         multiplayer
             .signals()
             .peer_connected()
             .builder()
-            .connect_other_gd(&gd_ref, |mut this: Gd<Self>, _id: i64| {
-                godot_print!("Someone connected, start the game!");
-                let game = load::<PackedScene>("res://game.tscn").instantiate_as::<Node3D>();
-                // Connect deferred so we can safely erase it from the callback.
-                // game.signals()
-                //     .game_finished()
-                //     .builder()
-                //     .flags(ConnectFlags::DEFERRED)
-                //     .connect_other_mut(&this, |this| {
-                //         this.end_game("Client disconnected.");
-                //     });
+            .connect_other_gd(&gd_ref, |mut this: Gd<Self>, id: i64| {
+                
+                let mut multiplayer = this.bind().base().get_multiplayer().unwrap();
+                if multiplayer.is_server() {
+                } else {
+                    this.bind_mut().show_lobby();
+                }
 
-                this.bind_mut()
-                    .base_mut()
-                    .get_tree()
-                    .unwrap()
-                    .get_root()
-                    .unwrap()
-                    .add_child(&game);
-                this.hide();
+                if let Some(peer) = &this.bind().peer {
+                    godot_print!("Player {} joined! I am {}", id, peer.get_unique_id());
+                } else {
+                    godot_print!("Player {} joined! I have no peer", id);
+                }
+
+
+                let name = this.bind().name_input.get_text();
+                this.bind_mut().add_new_lobby_player(id, &name);
+
             });
         multiplayer
             .signals()
@@ -106,7 +121,7 @@ impl IPanel for Lobby {
             .pressed()
             .builder()
             .connect_other_mut(&gd_ref, |this| {
-                this.on_host_pressed();
+                this.on_host_btn_pressed();
             });
 
         self.join_button
@@ -114,8 +129,14 @@ impl IPanel for Lobby {
             .pressed()
             .builder()
             .connect_other_mut(&gd_ref, |this| {
-                this.on_join_pressed();
+                this.on_join_btn_pressed();
             });
+
+        self.start_game_button
+            .signals()
+            .pressed()
+            .connect_other(&gd_ref, Self::on_start_game_pressed);
+
     }
 }
 
@@ -132,6 +153,26 @@ impl Lobby {
         }
     }
 
+    fn on_start_game_pressed(&mut self) {
+        if self.base().get_multiplayer().unwrap().is_server() {
+            self.base_mut().rpc("start_game", vslice![]);
+        }
+    }
+
+    #[rpc(authority, call_local)]
+    fn start_game(&mut self) {
+        // Instantiate the game scene
+        let game = load::<PackedScene>("res://game.tscn").instantiate_as::<Node3D>();
+
+        self.base_mut()
+            .get_tree()
+            .unwrap()
+            .get_root()
+            .unwrap()
+            .add_child(&game);
+        self.base_mut().hide();
+    }
+
     fn end_game(&mut self, with_error: &str) {
         if self.base().has_node("/root/Game") {
             // Erase immediately, otherwise network might show
@@ -142,17 +183,17 @@ impl Lobby {
 
         let mut multiplayer = self.base().get_multiplayer().unwrap();
         multiplayer.set_multiplayer_peer(Gd::null_arg()); // Remove peer.
-        self.host_button.set_disabled(false);
-        self.join_button.set_disabled(false);
+
+        self.hide_lobby();
 
         self.set_status(with_error, false);
     }
 
-    fn on_host_pressed(&mut self) {
+    fn on_host_btn_pressed(&mut self) {
         let mut peer = ENetMultiplayerPeer::new_gd();
         self.peer = Some(peer.clone());
-        // Set a maximum of 1 peer, since Pong is a 2-player game.
-        let err = peer.create_server_ex(DEFAULT_PORT).max_clients(1).done();
+        // Set a maximum of ... let's say 10 players.
+        let err = peer.create_server_ex(DEFAULT_PORT).max_clients(9).done();
         if err != Error::OK {
             // Is another server running?
             self.set_status("Can't host, address in use.", false);
@@ -164,9 +205,7 @@ impl Lobby {
 
         let mut multiplayer = self.base().get_multiplayer().unwrap();
         multiplayer.set_multiplayer_peer(&peer);
-        self.host_button.set_disabled(true);
-        self.join_button.set_disabled(true);
-        self.set_status("Waiting for player...", true);
+        self.show_lobby();
         let application_name = ProjectSettings::singleton()
             .get_setting("application/config/name")
             .to_string();
@@ -179,7 +218,7 @@ impl Lobby {
         self.find_public_ip_button.set_visible(true);
     }
 
-    fn on_join_pressed(&mut self) {
+    fn on_join_btn_pressed(&mut self) {
         let ip = self.address.get_text();
         if !ip.is_valid_ip_address() {
             self.set_status("IP address is invalid.", false);
@@ -205,8 +244,19 @@ impl Lobby {
             .set_title(&format!("{application_name}: Client"));
     }
 
-    fn _on_find_public_ip_pressed(&mut self) {
-        let mut os = Os::singleton();
-        os.shell_open("https://icanhazip.com/");
+    fn add_new_lobby_player(&mut self, id: i64, name: &GString) {
+        let mut lobby_player: Gd<LobbyPlayer> = self.lobby_player_scene.instantiate_as();
+        lobby_player.bind_mut().initialize(id, name);
+        self.players_joined_container.add_child(&lobby_player);
+    }
+
+    fn show_lobby(&mut self) {
+        self.join_panel.hide();
+        self.created_lobby.show();
+    }
+
+    fn hide_lobby(&mut self) {
+        self.join_panel.show();
+        self.created_lobby.hide();
     }
 }

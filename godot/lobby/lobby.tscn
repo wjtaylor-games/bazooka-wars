@@ -2,24 +2,28 @@
 
 [ext_resource type="PackedScene" uid="uid://cksyyy1ig36j0" path="res://lobby/lobby_player.tscn" id="1_jtv5c"]
 
-[node name="Lobby" type="Control"]
-layout_mode = 3
+[node name="Lobby" type="Lobby" node_paths=PackedStringArray("join_panel", "created_lobby", "players_joined_container", "name_input", "address", "host_button", "start_game_button", "join_button", "status_ok", "status_fail", "port_forward_label", "find_public_ip_button")]
+join_panel = NodePath("JoinPanel")
+created_lobby = NodePath("CreatedLobby")
+players_joined_container = NodePath("CreatedLobby/PlayersJoined")
+name_input = NodePath("JoinPanel/NameInput")
+address = NodePath("JoinPanel/Address")
+host_button = NodePath("JoinPanel/HostButton")
+start_game_button = NodePath("CreatedLobby/HostControl/StartButton")
+join_button = NodePath("JoinPanel/JoinButton")
+status_ok = NodePath("JoinPanel/StatusOk")
+status_fail = NodePath("JoinPanel/StatusFail")
+port_forward_label = NodePath("JoinPanel/PortForward")
+find_public_ip_button = NodePath("JoinPanel/FindPublicIP")
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-size_flags_horizontal = 2
-size_flags_vertical = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
 
-[node name="JoinPanel" type="JoinPanel" parent="." node_paths=PackedStringArray("address", "host_button", "join_button", "status_ok", "status_fail", "port_forward_label", "find_public_ip_button")]
-address = NodePath("Address")
-host_button = NodePath("HostButton")
-join_button = NodePath("JoinButton")
-status_ok = NodePath("StatusOk")
-status_fail = NodePath("StatusFail")
-port_forward_label = NodePath("PortForward")
-find_public_ip_button = NodePath("FindPublicIP")
+[node name="JoinPanel" type="Panel" parent="."]
 visible = false
 layout_mode = 1
 anchors_preset = 8
@@ -204,7 +208,7 @@ offset_bottom = 78.0
 theme_override_font_sizes/font_size = 26
 text = "This is the Lobby"
 
-[node name="Button" type="Button" parent="CreatedLobby/HostControl"]
+[node name="StartButton" type="Button" parent="CreatedLobby/HostControl"]
 layout_mode = 1
 anchors_preset = -1
 anchor_left = 0.5
