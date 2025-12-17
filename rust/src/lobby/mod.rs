@@ -7,11 +7,13 @@ use godot::classes::{
 use godot::global::Error;
 use godot::prelude::*;
 
+mod lobby_player;
+
 const DEFAULT_PORT: i32 = 8910;
 
 #[derive(GodotClass)]
 #[class(init, base=Panel)]
-pub struct Lobby {
+pub struct JoinPanel {
     #[export]
     address: OnEditor<Gd<LineEdit>>,
     #[export]
@@ -31,7 +33,7 @@ pub struct Lobby {
 }
 
 #[godot_api]
-impl IPanel for Lobby {
+impl IPanel for JoinPanel {
     fn ready(&mut self) {
         /*
         # Connect all the callbacks related to networking.
@@ -117,7 +119,7 @@ impl IPanel for Lobby {
 }
 
 #[godot_api]
-impl Lobby {
+impl JoinPanel {
     fn set_status(&mut self, text: &str, is_ok: bool) {
         // Simple way to show status.
         if is_ok {
