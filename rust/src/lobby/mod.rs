@@ -3,6 +3,7 @@ use godot::classes::enet_connection::CompressionMode;
 use godot::classes::object::ConnectFlags;
 use godot::classes::{
     Button, ENetMultiplayerPeer, IPanel, Label, LineEdit, LinkButton, Os, Panel, ProjectSettings,
+    Control, IControl,
 };
 use godot::global::Error;
 use godot::prelude::*;
@@ -13,7 +14,7 @@ const DEFAULT_PORT: i32 = 8910;
 
 #[derive(GodotClass)]
 #[class(init, base=Panel)]
-pub struct JoinPanel {
+pub struct Lobby {
     #[export]
     address: OnEditor<Gd<LineEdit>>,
     #[export]
@@ -33,7 +34,7 @@ pub struct JoinPanel {
 }
 
 #[godot_api]
-impl IPanel for JoinPanel {
+impl IPanel for Lobby {
     fn ready(&mut self) {
         /*
         # Connect all the callbacks related to networking.
@@ -119,7 +120,7 @@ impl IPanel for JoinPanel {
 }
 
 #[godot_api]
-impl JoinPanel {
+impl Lobby {
     fn set_status(&mut self, text: &str, is_ok: bool) {
         // Simple way to show status.
         if is_ok {
