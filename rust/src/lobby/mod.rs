@@ -11,7 +11,8 @@ use godot::global::Error;
 use godot::prelude::*;
 
 mod lobby_player;
-use lobby_player::LobbyPlayer;
+use lobby_player::{LobbyPlayer};
+use crate::game::Game;
 
 const DEFAULT_PORT: i32 = 8910;
 
@@ -44,9 +45,11 @@ pub struct Lobby {
     port_forward_label: OnEditor<Gd<Label>>,
     #[export]
     find_public_ip_button: OnEditor<Gd<LinkButton>>,
+    player_names_dict: VarDictionary,
     peer: Option<Gd<ENetMultiplayerPeer>>,
     base: Base<Control>,
 }
+
 
 #[godot_api]
 impl IControl for Lobby {
@@ -88,11 +91,6 @@ impl IControl for Lobby {
                     this.bind_mut().show_lobby();
                 }
 
-                if let Some(peer) = &this.bind().peer {
-                    godot_print!("Player {} met! I am {}", id, peer.get_unique_id());
-                } else {
-                    godot_print!("Player {} met! I have no peer", id);
-                }
                 let name: GString = this.bind().name_input.get_text().clone();
 
                 // Tell the other player about yourself
@@ -171,13 +169,14 @@ impl Lobby {
     fn on_start_game_pressed(&mut self) {
         if self.base().get_multiplayer().unwrap().is_server() {
             self.base_mut().rpc("start_game", &[]);
+            self.start_game_authority();
         }
     }
 
-    #[rpc(authority, call_local)]
+    #[rpc(authority, call_remote, reliable)]
     fn start_game(&mut self) {
         // Instantiate the game scene
-        let game = load::<PackedScene>("res://game.tscn").instantiate_as::<Node3D>();
+        let game = load::<PackedScene>("res://game.tscn").instantiate_as::<Game>();
 
         self.base_mut()
             .get_tree()
@@ -186,6 +185,21 @@ impl Lobby {
             .unwrap()
             .add_child(&game);
         self.base_mut().hide();
+    }
+
+    fn start_game_authority(&mut self) {
+        // Start the game, and also kick off the player spawner
+        let mut game = load::<PackedScene>("res://game.tscn").instantiate_as::<Game>();
+        game.bind_mut().initialize_authority(&self.player_names_dict);
+        self.base_mut()
+            .get_tree()
+            .unwrap()
+            .get_root()
+            .unwrap()
+            .add_child(&game);
+        self.base_mut().hide();
+
+
     }
 
     fn end_game(&mut self, with_error: &str) {
@@ -234,11 +248,13 @@ impl Lobby {
         // Only show hosting instructions when relevant.
         self.port_forward_label.set_visible(true);
         self.find_public_ip_button.set_visible(true);
+        let name = self.name_input.get_text();
         self.add_new_lobby_player(
             peer.get_unique_id() as i64,
-            &self.name_input.get_text(),
+            &name,
             true
         );
+        self.player_names_dict.set(1 as i64, name);
     }
 
     fn on_join_btn_pressed(&mut self) {
@@ -277,6 +293,7 @@ impl Lobby {
         let mut multiplayer = self.base().get_multiplayer().unwrap();
         let id = multiplayer.get_remote_sender_id() as i64;
         self.add_new_lobby_player(id, &name, false);
+        self.player_names_dict.set(id, name);
     }
 
     fn add_new_lobby_player(&mut self, id: i64, name: &GString, is_self: bool) {

@@ -1,7 +1,6 @@
-[gd_scene load_steps=6 format=3 uid="uid://bfd2lo232dfv"]
+[gd_scene load_steps=5 format=3 uid="uid://bfd2lo232dfv"]
 
 [ext_resource type="PackedScene" uid="uid://qvkf2syyk2uu" path="res://gridmap/grid_map_1.tscn" id="1_feb5d"]
-[ext_resource type="PackedScene" uid="uid://djue2jfmxkahd" path="res://player/player.tscn" id="1_ig7tw"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_ig7tw"]
 sun_angle_max = 11.78
@@ -14,19 +13,15 @@ sky_material = SubResource("ProceduralSkyMaterial_ig7tw")
 background_mode = 2
 sky = SubResource("Sky_0xm2m")
 
-[node name="Game" type="Node3D"]
+[node name="Game" type="Game" node_paths=PackedStringArray("player_spawner")]
+player_spawner = NodePath("NPlayers")
 
 [node name="GridMap1" parent="." instance=ExtResource("1_feb5d")]
 
-[node name="TwoPlayers" type="TwoPlayers" parent="." node_paths=PackedStringArray("host_player", "client_player")]
-host_player = NodePath("HostPlayer")
-client_player = NodePath("ClientPlayer")
+[node name="NPlayers" type="NPlayers" parent="." node_paths=PackedStringArray("spawn_points_container")]
+spawn_points_container = NodePath("../SpawnPoints")
 
-[node name="HostPlayer" parent="TwoPlayers" instance=ExtResource("1_ig7tw")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.1592293, 8.575236)
-
-[node name="ClientPlayer" parent="TwoPlayers" instance=ExtResource("1_ig7tw")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4149446, -2.3533168)
+[node name="SpawnPoints" type="Node" parent="."]
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_h2yge")
@@ -123,3 +118,5 @@ theme_override_font_sizes/font_size = 38
 text = "Paused"
 horizontal_alignment = 1
 vertical_alignment = 2
+
+[node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="."]

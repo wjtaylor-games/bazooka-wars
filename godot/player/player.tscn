@@ -103,7 +103,6 @@ shape = SubResource("SphereShape3D_kqu6x")
 
 [node name="PlayerCamera" type="Camera3D" parent="PlayerKinematicBody"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.2725258)
-current = true
 
 [node name="Bazooka" type="Node3D" parent="PlayerKinematicBody"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.66112757, 0.12717438, 0)
