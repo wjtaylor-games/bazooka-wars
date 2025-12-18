@@ -1,6 +1,4 @@
-[gd_scene load_steps=2 format=3 uid="uid://f85s2avde6r4"]
-
-[ext_resource type="PackedScene" uid="uid://cksyyy1ig36j0" path="res://lobby/lobby_player.tscn" id="1_jtv5c"]
+[gd_scene format=3 uid="uid://f85s2avde6r4"]
 
 [node name="Lobby" type="Lobby" node_paths=PackedStringArray("join_panel", "created_lobby", "players_joined_container", "name_input", "address", "host_button", "start_game_button", "join_button", "status_ok", "status_fail", "port_forward_label", "find_public_ip_button")]
 join_panel = NodePath("JoinPanel")
@@ -231,12 +229,6 @@ anchor_top = 0.569
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_top = 129.288
-
-[node name="LobbyPlayer" parent="CreatedLobby/PlayersJoined" instance=ExtResource("1_jtv5c")]
-layout_mode = 2
-
-[node name="LobbyPlayer2" parent="CreatedLobby/PlayersJoined" instance=ExtResource("1_jtv5c")]
-layout_mode = 2
 
 [connection signal="pressed" from="JoinPanel/HostButton" to="JoinPanel" method="_on_host_pressed"]
 [connection signal="pressed" from="JoinPanel/JoinButton" to="JoinPanel" method="_on_join_pressed"]

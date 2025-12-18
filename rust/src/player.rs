@@ -67,7 +67,7 @@ impl IArea3D for Player {
         
         // Out of bounds condition
         if self.base().is_multiplayer_authority() && pos.y < -10.0 {
-            self.base_mut().rpc("reset_pos", vslice![]);
+            self.base_mut().rpc("reset_pos", &[]);
         }
         self.sync_ragdoll(self.ragdoll);
     }
@@ -77,11 +77,11 @@ impl IArea3D for Player {
                 && Input::singleton().get_mouse_mode() == MouseMode::CAPTURED {
             if event.is_action_pressed("ragdoll") {
                 godot_print!("ragdoll activated");
-                self.base_mut().rpc("begin_ragdoll", vslice![]);
+                self.base_mut().rpc("begin_ragdoll", &[]);
             }
 
             if !self.ragdoll && event.is_action_pressed("shoot") {
-                self.base_mut().rpc("shoot_rocket", vslice![]);
+                self.base_mut().rpc("shoot_rocket", &[]);
             }
         }
     }
@@ -123,7 +123,7 @@ impl Player {
             if explosion.bind().get_time() < 0.2 {
                 if self.base().is_multiplayer_authority() {
                     // activate ragdoll across network
-                    self.base_mut().rpc("begin_ragdoll", vslice![]);
+                    self.base_mut().rpc("begin_ragdoll", &[]);
                 } else {
                     // only activate ragdoll here, until corrected
                     // by a sync

@@ -113,7 +113,7 @@ impl Mine {
     fn on_stomped(&mut self, area: Gd<Area3D>) {
         if self.base().is_multiplayer_authority() {
             if let Ok(_player) = area.try_cast::<Player>() {
-                let args = vslice![];
+                let args = &[];
                 self.base_mut().rpc("explode", args);
             }
         }

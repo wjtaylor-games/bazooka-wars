@@ -4,7 +4,9 @@ use godot::classes::object::ConnectFlags;
 use godot::classes::{
     Button, ENetMultiplayerPeer, Label, LineEdit, LinkButton, ProjectSettings,
     Control, IControl,
+    Input,
 };
+use godot::classes::input::{MouseMode};
 use godot::global::Error;
 use godot::prelude::*;
 
@@ -63,6 +65,17 @@ impl IControl for Lobby {
         // Shows the main menu
         self.hide_lobby();
 
+        // multiplayer
+        //     .signals()
+        //     .connected_to_server()
+        //     .builder()
+        //     .connect_other_gd(&gd_ref, |mut this: Gd<Self>| {
+        //         if let Some(peer) = &this.bind().peer {
+        //         } else {
+        //             godot_error!("peer is None type!")
+        //         }
+        //     });
+
         multiplayer
             .signals()
             .peer_connected()
@@ -76,27 +89,29 @@ impl IControl for Lobby {
                 }
 
                 if let Some(peer) = &this.bind().peer {
-                    godot_print!("Player {} joined! I am {}", id, peer.get_unique_id());
+                    godot_print!("Player {} met! I am {}", id, peer.get_unique_id());
                 } else {
-                    godot_print!("Player {} joined! I have no peer", id);
+                    godot_print!("Player {} met! I have no peer", id);
                 }
+                let name: GString = this.bind().name_input.get_text().clone();
 
-
-                let name = this.bind().name_input.get_text();
-                this.bind_mut().add_new_lobby_player(id, &name);
+                // Tell the other player about yourself
+                this.rpc_id(id, "register_player", vslice![name]);
 
             });
-        multiplayer
-            .signals()
-            .peer_disconnected()
-            .builder()
-            .connect_other_mut(&gd_ref, |this, _id: i64| {
-                if this.base().get_multiplayer().unwrap().is_server() {
-                    this.end_game("Client disconnected.");
-                } else {
-                    this.end_game("Server disconnected.");
-                }
-            });
+
+        // multiplayer
+        //     .signals()
+        //     .peer_disconnected()
+        //     .builder()
+        //     .connect_other_mut(&gd_ref, |this, _id: i64| {
+        //         if this.base().get_multiplayer().unwrap().is_server() {
+        //             this.end_game("Client disconnected.");
+        //         } else {
+        //             this.end_game("Server disconnected.");
+        //         }
+        //     });
+
         multiplayer
             .signals()
             .connection_failed()
@@ -155,7 +170,7 @@ impl Lobby {
 
     fn on_start_game_pressed(&mut self) {
         if self.base().get_multiplayer().unwrap().is_server() {
-            self.base_mut().rpc("start_game", vslice![]);
+            self.base_mut().rpc("start_game", &[]);
         }
     }
 
@@ -179,6 +194,9 @@ impl Lobby {
             // errors (this is why we connected deferred above).
             self.base().get_node_as::<Node>("/root/Game").free();
             self.base_mut().show();
+            // Free the mouse cursor
+            let mut input = Input::singleton();
+            input.set_mouse_mode(MouseMode::VISIBLE);
         }
 
         let mut multiplayer = self.base().get_multiplayer().unwrap();
@@ -216,6 +234,11 @@ impl Lobby {
         // Only show hosting instructions when relevant.
         self.port_forward_label.set_visible(true);
         self.find_public_ip_button.set_visible(true);
+        self.add_new_lobby_player(
+            peer.get_unique_id() as i64,
+            &self.name_input.get_text(),
+            true
+        );
     }
 
     fn on_join_btn_pressed(&mut self) {
@@ -242,11 +265,31 @@ impl Lobby {
             .get_window()
             .unwrap()
             .set_title(&format!("{application_name}: Client"));
+        self.add_new_lobby_player(
+            peer.get_unique_id() as i64,
+            &self.name_input.get_text(),
+            true
+        );
     }
 
-    fn add_new_lobby_player(&mut self, id: i64, name: &GString) {
+    #[rpc(any_peer, call_remote, reliable)]
+    fn register_player(&mut self, name: GString) {
+        let mut multiplayer = self.base().get_multiplayer().unwrap();
+        let id = multiplayer.get_remote_sender_id() as i64;
+        self.add_new_lobby_player(id, &name, false);
+    }
+
+    fn add_new_lobby_player(&mut self, id: i64, name: &GString, is_self: bool) {
         let mut lobby_player: Gd<LobbyPlayer> = self.lobby_player_scene.instantiate_as();
-        lobby_player.bind_mut().initialize(id, name);
+        lobby_player.bind_mut().initialize(id, &name, is_self);
+
+        // Connect signals to the LobbyPlayer
+        let multiplayer = self.base().get_multiplayer().unwrap();
+        multiplayer
+            .signals()
+            .peer_disconnected()
+            .connect_other(&lobby_player, LobbyPlayer::on_peer_disconnected);
+
         self.players_joined_container.add_child(&lobby_player);
     }
 
