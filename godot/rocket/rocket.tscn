@@ -46,6 +46,7 @@ radius = 0.1
 
 [node name="Rocket" type="Rocket"]
 thrust = 1500.0
+lifetime = 8.0
 mass = 50.0
 gravity_scale = 0.0
 contact_monitor = true

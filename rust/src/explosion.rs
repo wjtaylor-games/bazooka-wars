@@ -22,12 +22,13 @@ impl IArea3D for Explosion {
     fn ready(&mut self) {
         // Explosion should explode one time
         self.explosion_particles.set_one_shot(true);
-        self.explosion_particles.set_emitting(true);
+        // self.explosion_particles.set_emitting(true);
+        self.explosion_particles.restart();
 
         self.explosion_particles
             .signals()
             .finished()
-            .connect_other(&self.to_gd(), Self::on_visibility_screen_exited);
+            .connect_other(&self.to_gd(), Self::on_done_exploding);
     }
 
     fn physics_process(&mut self, delta: f32) {
@@ -39,7 +40,7 @@ impl IArea3D for Explosion {
 #[godot_api]
 impl Explosion {
     #[func]
-    fn on_visibility_screen_exited(&mut self) {
+    fn on_done_exploding(&mut self) {
         // Explosion is done exploding
         self.base_mut().queue_free();
     }
