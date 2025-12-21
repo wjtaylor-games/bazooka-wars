@@ -82,7 +82,7 @@ impl IArea3D for Player {
                 && Input::singleton().get_mouse_mode() == MouseMode::CAPTURED {
             if event.is_action_pressed("ragdoll") {
                 godot_print!("ragdoll activated");
-                self.base_mut().rpc("begin_ragdoll", &[]);
+                self.begin_ragdoll();
             }
 
             if !self.ragdoll && event.is_action_pressed("shoot") {
@@ -136,14 +136,7 @@ impl Player {
     pub fn on_area_entered(&mut self, area: Gd<Area3D>) {
         if let Ok(explosion) = area.try_cast::<Explosion>() {
             if explosion.bind().get_time() < 0.2 {
-                if self.base().is_multiplayer_authority() {
-                    // activate ragdoll across network
-                    self.base_mut().rpc("begin_ragdoll", &[]);
-                } else {
-                    // only activate ragdoll here, until corrected
-                    // by a sync
-                    self.begin_ragdoll();
-                }
+                self.begin_ragdoll();
                 let radius_vec = self.player_dynamic_body.get_position()
                     - explosion.get_position();
                 let new_velocity =
@@ -169,7 +162,6 @@ impl Player {
         self.end_ragdoll();
     }
 
-    #[rpc(authority, call_local)]
     fn begin_ragdoll(&mut self) {
         self.ragdoll_timer.start();
         self.ragdoll = true;
@@ -179,7 +171,6 @@ impl Player {
         self.player_dynamic_body.set_physics_process(true);
     }
 
-    #[rpc(authority, call_local)]
     fn end_ragdoll(&mut self) {
         self.ragdoll = false;
         self.player_kinematic_body.set_visible(true);
@@ -188,7 +179,7 @@ impl Player {
         self.player_dynamic_body.set_physics_process(false);
     }
 
-    #[rpc(authority, call_remote)]
+    #[rpc(authority, call_remote, unreliable_ordered)]
     fn sync_ragdoll(&mut self, ragdoll: bool) {
         if self.ragdoll && !ragdoll {
             self.end_ragdoll();
