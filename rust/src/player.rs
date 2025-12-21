@@ -86,7 +86,10 @@ impl IArea3D for Player {
             }
 
             if !self.ragdoll && event.is_action_pressed("shoot") {
-                self.base_mut().rpc("shoot_rocket", &[]);
+                let rocket_pos = self.player_kinematic_body.bind().get_aim_position();
+                let rocket_rot = self.player_kinematic_body.bind().get_aim_rotation();
+                let base_vel = self.player_kinematic_body.get_velocity();
+                self.base_mut().rpc("shoot_rocket", vslice![rocket_pos, rocket_rot, base_vel]);
             }
         }
     }
@@ -189,18 +192,19 @@ impl Player {
     }
 
     #[rpc(any_peer, call_local)]
-    pub fn shoot_rocket(&mut self) {
+    pub fn shoot_rocket(&mut self, position: Vector3, rotation: Vector3,
+                        base_velocity: Vector3) {
         if self.bazooka_loaded {
             let mut rocket: Gd<Rocket> = self.rocket_scene.instantiate_as();
             rocket.set_multiplayer_authority(
                 self.base().get_multiplayer_authority()
             );
-            rocket.set_position(self.player_kinematic_body.bind().get_aim_position());
-            rocket.set_rotation(self.player_kinematic_body.bind().get_aim_rotation());
+            rocket.set_position(position);
+            rocket.set_rotation(rotation);
             let rocket_basis = rocket.get_basis();
             rocket.set_linear_velocity(
                 rocket_basis * Vector3::FORWARD * self.rocket_init_vel
-                + self.player_kinematic_body.get_velocity()
+                + base_velocity
             );
             self.base_mut().add_sibling(&rocket);
 

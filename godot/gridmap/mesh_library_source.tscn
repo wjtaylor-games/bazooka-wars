@@ -35,6 +35,3 @@ mesh = SubResource("BoxMesh_stmqc")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="cube/StaticBody3D"]
 shape = SubResource("ConvexPolygonShape3D_j2r2k")
-
-[node name="GPUParticlesCollisionBox3D" type="GPUParticlesCollisionBox3D" parent="cube"]
-size = Vector3(1, 1, 1)
