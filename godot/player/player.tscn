@@ -139,9 +139,9 @@ skeleton = NodePath("../../PlayerKinematicBody")
 wait_time = 3.0
 one_shot = true
 
-[node name="SphereCollider" type="CollisionShape3D" parent="."]
-shape = SubResource("SphereShape3D_kqu6x")
-
 [node name="ReloadTimer" type="Timer" parent="."]
 wait_time = 0.1
 one_shot = true
+
+[node name="SphereCollider" type="CollisionShape3D" parent="."]
+shape = SubResource("SphereShape3D_kqu6x")

@@ -66,11 +66,15 @@ impl IArea3D for Player {
         let pos = self.player_dynamic_body.get_position();
         self.base_mut().set_position(pos);
         
-        // Out of bounds condition
-        if self.base().is_multiplayer_authority() && pos.y < -10.0 {
-            self.base_mut().rpc("reset_pos", &[]);
+        if self.base().is_multiplayer_authority() {
+            // Make sure ragdoll states don't diverge
+            let args = vslice![self.ragdoll];
+            self.base_mut().rpc("sync_ragdoll", args);
+            // Out of bounds condition
+            if pos.y < -10.0 {
+                self.base_mut().rpc("reset_pos", &[]);
+            }
         }
-        self.sync_ragdoll(self.ragdoll);
     }
 
     fn input(&mut self, event: Gd<InputEvent>) {
@@ -272,7 +276,6 @@ impl ICharacterBody3D for PlayerKinematicBody {
     }
 
     fn physics_process(&mut self, delta: f32) {
-
         if self.base().is_multiplayer_authority() {
             let mut velocity = self.base().get_velocity();
             velocity += self.gravity * delta;
@@ -327,11 +330,15 @@ impl ICharacterBody3D for PlayerKinematicBody {
                 self.jumping = true;
             }
 
-            let new_velocity = horizontal_velocity + Vector3::UP * vertical_velocity;
-            let args = vslice![self.jumping, new_velocity];
-            self.base_mut().rpc("update_jumping_and_velocity", args);
-            let args = vslice![self.base().get_position()];
-            self.base_mut().rpc("update_position", args);
+            self.base_mut().set_velocity(horizontal_velocity + Vector3::UP * vertical_velocity);
+            let args = vslice![
+                self.jumping,
+                self.base().get_position(),
+                self.base().get_velocity(),
+                self.base().get_rotation(),
+                self.camera.get_rotation(),
+            ];
+            self.base_mut().rpc("sync_state", args);
         }
 
         self.base_mut().move_and_slide();
@@ -352,10 +359,11 @@ impl ICharacterBody3D for PlayerKinematicBody {
                 let mut cam_rotation = self.camera.get_rotation();
                 cam_rotation.x = clamp::<f32>(cam_rotation.x - motion_vec.y,
                     -PI/2.0, PI/2.0);
-                self.base_mut().rpc(
-                    "update_rotations",
-                    vslice![rotation, cam_rotation]
-                );
+                self.base_mut().set_rotation(rotation);
+                self.camera.set_rotation(cam_rotation);
+                self.mesh.set_rotation(cam_rotation);
+                let bazooka_rotation = cam_rotation + Vector3::UP * self.bazooka.get_rotation().y;
+                self.bazooka.set_rotation(bazooka_rotation);
             }
         }
     }
@@ -363,20 +371,19 @@ impl ICharacterBody3D for PlayerKinematicBody {
 
 #[godot_api]
 impl PlayerKinematicBody {
-    #[rpc(any_peer, call_local)]
-    pub fn update_jumping_and_velocity(&mut self, jumping: bool, velocity: Vector3) {
+
+    #[rpc(authority, unreliable_ordered, call_remote)]
+    pub fn sync_state(
+        &mut self,
+        jumping: bool,
+        position: Vector3,
+        velocity: Vector3,
+        yaw_rotation: Vector3,
+        cam_rotation: Vector3,
+    ) {
         self.jumping = jumping;
-        self.base_mut().set_velocity(velocity);
-    }
-
-    // This is called for remote, not local
-    #[rpc(any_peer, call_remote)]
-    pub fn update_position(&mut self, position: Vector3) {
         self.base_mut().set_position(position);
-    }
-
-    #[rpc(any_peer, call_local)]
-    pub fn update_rotations(&mut self, yaw_rotation: Vector3, cam_rotation: Vector3) {
+        self.base_mut().set_velocity(velocity);
         self.base_mut().set_rotation(yaw_rotation);
         self.camera.set_rotation(cam_rotation);
         self.mesh.set_rotation(cam_rotation);
@@ -425,7 +432,7 @@ impl IRigidBody3D for PlayerDynamicBody {
 impl PlayerDynamicBody {
 
     // This is called for remote, not local
-    #[rpc(authority, call_remote)]
+    #[rpc(authority, unreliable_ordered, call_remote)]
     pub fn update_states(&mut self,
                          position: Vector3,
                          rotation: Vector3,
