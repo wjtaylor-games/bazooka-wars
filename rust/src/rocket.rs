@@ -51,16 +51,23 @@ impl IRigidBody3D for Rocket {
 #[godot_api]
 impl Rocket {
     #[func]
-    fn on_body_entered(&mut self, _body: Gd<Node>) {
-        self.explode();
+    fn on_body_entered(&mut self, body: Gd<Node>) {
+        let pos = self.base().get_position();
+        if let Ok(_) = body.try_cast::<RigidBody3D>() {
+            // TODO: This occasionally causes errors because
+            // the other player's missile already hit a wall and exploded
+            self.base_mut().rpc("explode", vslice![pos]);
+        } else {
+            self.explode(pos);
+        }
     }
 
-    #[func]
-    pub fn explode(&mut self) {
+    #[rpc(any_peer, call_local, unreliable)]
+    pub fn explode(&mut self, position: Vector3) {
         // Explode with an explosion
         let mut explosion = self.explosion_scene
             .instantiate_as::<Explosion>();
-        explosion.set_position(self.base().get_position());
+        explosion.set_position(position);
         self.base_mut().add_sibling(&explosion);
         self.base_mut().queue_free();
     }

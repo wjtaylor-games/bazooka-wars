@@ -67,10 +67,13 @@ impl NPlayers {
     pub fn spawn_player(&mut self, peer_id: i64) {
         // Crate player instance
         let mut player: Gd<Player> = self.player_scene.instantiate_as();
-        self.base_mut().add_child(&player);
 
         // Set player authority and camera state
         player.set_multiplayer_authority(peer_id as i32);
+        // Must set multiplayer authority before adding
+        // to scene tree so that it inherits correctly
+        self.base_mut().add_child(&player);
+
         let this_id = self.base().get_multiplayer().unwrap().get_unique_id();
         let do_connect_camera: bool = this_id as i64 == peer_id;
         if do_connect_camera {

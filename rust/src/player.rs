@@ -191,7 +191,7 @@ impl Player {
         }
     }
 
-    #[rpc(any_peer, call_local)]
+    #[rpc(authority, call_local, reliable)]
     pub fn shoot_rocket(&mut self, position: Vector3, rotation: Vector3,
                         base_velocity: Vector3) {
         if self.bazooka_loaded {
@@ -206,7 +206,12 @@ impl Player {
                 rocket_basis * Vector3::FORWARD * self.rocket_init_vel
                 + base_velocity
             );
-            self.base_mut().add_sibling(&rocket);
+            self.base_mut()
+                .get_tree()
+                .unwrap()
+                .get_root()
+                .unwrap()
+                .add_child(&rocket);
 
             self.bazooka_loaded = false;
             self.reload_timer.start();
@@ -410,6 +415,17 @@ pub struct PlayerDynamicBody {
 
 #[godot_api]
 impl IRigidBody3D for PlayerDynamicBody {
+    fn ready(&mut self) {
+        // set collision layer 8 on if and only if
+        // this is the multiplayer authority
+        let layer: u32 = self.base().get_collision_layer();
+        if self.base().is_multiplayer_authority() {
+            self.base_mut().set_collision_layer(layer | 0b10000000);
+        } else {
+            self.base_mut().set_collision_layer(layer & 0b01111111);
+        }
+    }
+
     fn physics_process(&mut self, _delta: f32) {
         if self.base().is_multiplayer_authority() {
             let args = vslice![
