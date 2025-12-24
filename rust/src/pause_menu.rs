@@ -8,7 +8,6 @@ use godot::classes::{
 };
 
 
-
 #[derive(GodotClass)]
 #[class(init, base=Control)]
 pub struct PauseMenu {
@@ -58,5 +57,9 @@ impl PauseMenu {
         self.paused = false;
         self.base_mut().set_visible(false);
         Input::singleton().set_mouse_mode(MouseMode::CAPTURED);
+        self.signals().unpause().emit();
     }
+
+    #[signal]
+    pub fn unpause();
 }

@@ -6,6 +6,7 @@ use crate::pause_menu::PauseMenu;
 use godot::classes::{
     Node, INode,
     Node3D, INode3D,
+    ConfigFile,
 };
 
 
@@ -25,8 +26,42 @@ pub struct Game {
 impl INode3D for Game {
     fn ready(&mut self) {
         let gd_ref = self.to_gd();
+
+        let mut config_file = ConfigFile::new_gd();
+        config_file.load("user://settings.cfg");
+
+        let mut ms: f64 = self.global_mouse_sensitivity;
+        let value: Variant = config_file.get_value_ex(
+            "Controls",
+            "mouse_sensitivity",
+        ).default(&Variant::from(ms)).done();
+        ms = if let Ok(value) = value.try_to::<f64>() {
+            // self.global_mouse_sensitivity = value;
+            value
+        } else {
+            self.global_mouse_sensitivity
+        };
+
+        self.pause_menu.bind_mut().get_sensitivity_slider()
+            .unwrap().set_value(ms);
+
         self.pause_menu
-            .bind()
+            .signals()
+            .unpause()
+            .builder()
+            .connect_other_mut(&gd_ref, |this| {
+                let mut config_file = ConfigFile::new_gd();
+                config_file.set_value(
+                    "Controls",
+                    "mouse_sensitivity",
+                    &Variant::from(this.global_mouse_sensitivity),
+                );
+                config_file.save("user://settings.cfg");
+                godot_print!("Configs saved! {}", this.global_mouse_sensitivity);
+            });
+
+        self.pause_menu
+            .bind_mut()
             .get_sensitivity_slider()
             .unwrap()
             .signals()
@@ -36,10 +71,9 @@ impl INode3D for Game {
                 this.global_mouse_sensitivity = value;
                 this.signals().mouse_sensitivity_changed().emit(value);
             });
-        let ms = self.global_mouse_sensitivity;
-        self.pause_menu.bind_mut().get_sensitivity_slider()
-            .unwrap().set_value(ms);
+
         self.signals().mouse_sensitivity_changed().emit(ms);
+
     }
 }
 
