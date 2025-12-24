@@ -13,6 +13,7 @@ use num::clamp;
 
 use crate::explosion::Explosion;
 use crate::rocket::Rocket;
+use crate::game::Game;
 
 // const SHOOT_SCALE: f32 = 2.0;
 // const CHAR_SCALE: Vector3 = Vector3::new(0.3, 0.3, 0.3);
@@ -33,6 +34,8 @@ pub struct Player {
     reload_timer: OnReady<Gd<Timer>>,
     #[init(val=OnReady::from_loaded("res://rocket/rocket.tscn"))]
     rocket_scene: OnReady<Gd<PackedScene>>,
+    #[init(node="../..")]
+    game_root: OnReady<Gd<Game>>,
     #[export]
     #[init(val=15.0)]
     rocket_init_vel: f32,
@@ -119,6 +122,14 @@ impl IArea3D for Player {
         self.signals()
             .area_entered()
             .connect_self(Self::on_area_entered);
+
+        if self.base().is_multiplayer_authority() {
+            self.game_root
+                .signals()
+                .mouse_sensitivity_changed()
+                .connect_other(&*self.player_kinematic_body,
+                    PlayerKinematicBody::on_mouse_sensitivity_changed);
+        }
     }    
 }
 
@@ -245,7 +256,8 @@ pub struct PlayerKinematicBody {
     #[export]
     max_speed: f32,
     #[export]
-    mouse_sensitivity: f32,
+    base_mouse_sensitivity: f64,
+    mouse_sensitivity_mult: f64,
     base: Base<CharacterBody3D>
 }
 
@@ -267,7 +279,8 @@ impl ICharacterBody3D for PlayerKinematicBody {
             accel: 12.0,
             deaccel: 12.0,
             max_speed: 4.0,
-            mouse_sensitivity: 0.005,
+            base_mouse_sensitivity: 0.007,
+            mouse_sensitivity_mult: 0.5,
             base,
         }
     }
@@ -349,7 +362,8 @@ impl ICharacterBody3D for PlayerKinematicBody {
                 && Input::singleton().get_mouse_mode() == MouseMode::CAPTURED {
             if let Ok(e) = event.try_cast::<InputEventMouseMotion>() {
                 // Set the Kinematic Player yaw rotation
-                let motion_vec = e.get_relative() * self.mouse_sensitivity;
+                let motion_vec = e.get_relative()
+                    * (self.base_mouse_sensitivity * self.mouse_sensitivity_mult) as f32;
                 let mut rotation = self.base().get_rotation();
                 rotation.y = wrapf(
                     (rotation.y - motion_vec.x) as f64,
@@ -404,6 +418,10 @@ impl PlayerKinematicBody {
     #[func]
     pub fn set_camera_current(&mut self, enabled: bool) {
         self.camera.set_current(enabled);
+    }
+
+    pub fn on_mouse_sensitivity_changed(&mut self, value: f64) {
+        self.mouse_sensitivity_mult = value;
     }
 }
 

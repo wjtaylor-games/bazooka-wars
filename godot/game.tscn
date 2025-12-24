@@ -13,8 +13,9 @@ sky_material = SubResource("ProceduralSkyMaterial_ig7tw")
 background_mode = 2
 sky = SubResource("Sky_0xm2m")
 
-[node name="Game" type="Game" node_paths=PackedStringArray("player_spawner")]
+[node name="Game" type="Game" node_paths=PackedStringArray("player_spawner", "pause_menu")]
 player_spawner = NodePath("NPlayers")
+pause_menu = NodePath("PauseMenu")
 
 [node name="GridMap1" parent="." instance=ExtResource("1_feb5d")]
 
@@ -72,10 +73,10 @@ offset_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="PauseMenu" type="PauseMenu" parent="." node_paths=PackedStringArray("unpause_button")]
+[node name="PauseMenu" type="PauseMenu" parent="." node_paths=PackedStringArray("unpause_button", "sensitivity_slider")]
 unpause_button = NodePath("CenterContainer/ResumeButton")
+sensitivity_slider = NodePath("MouseSensitivity")
 paused = true
-visible = false
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -118,5 +119,26 @@ theme_override_font_sizes/font_size = 38
 text = "Paused"
 horizontal_alignment = 1
 vertical_alignment = 2
+
+[node name="MouseSensitivity" type="HSlider" parent="PauseMenu"]
+layout_mode = 0
+offset_left = 57.0
+offset_top = 217.0
+offset_right = 419.0
+offset_bottom = 294.0
+min_value = 0.1
+max_value = 1.0
+step = 0.05
+value = 0.55
+scrollable = false
+
+[node name="Label" type="Label" parent="PauseMenu/MouseSensitivity"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 23.0
+grow_horizontal = 2
+text = "Mouse Sensitivity"
+horizontal_alignment = 1
 
 [node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="."]

@@ -2,7 +2,10 @@ use godot::prelude::*;
 use godot::classes::input::MouseMode;
 
 #[allow(unused_imports)]
-use godot::classes::{Control, IControl, Button, Input, InputEvent};
+use godot::classes::{
+    Control, IControl, Button, Input, InputEvent,
+    Slider,
+};
 
 
 
@@ -11,6 +14,8 @@ use godot::classes::{Control, IControl, Button, Input, InputEvent};
 pub struct PauseMenu {
     #[export]
     unpause_button: OnEditor<Gd<Button>>,
+    #[export]
+    sensitivity_slider: OnEditor<Gd<Slider>>,
     #[export]
     paused: bool,
     base: Base<Control>
