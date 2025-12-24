@@ -39,7 +39,7 @@ impl INode3D for Game {
             "mouse_sensitivity",
         ).default(&Variant::from(ms)).done();
         ms = if let Ok(value) = value.try_to::<f64>() {
-            // self.global_mouse_sensitivity = value;
+            self.global_mouse_sensitivity = value;
             value
         } else {
             self.global_mouse_sensitivity
