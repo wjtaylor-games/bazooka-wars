@@ -19,6 +19,9 @@ pub struct Game {
     pause_menu: OnEditor<Gd<PauseMenu>>,
     #[init(val=0.7)]
     global_mouse_sensitivity: f64,
+    #[export]
+    #[init(val=GString::from("user://settings.cfg"))]
+    settings_config_name: GString,
     base: Base<Node3D>,
 }
 
@@ -28,7 +31,7 @@ impl INode3D for Game {
         let gd_ref = self.to_gd();
 
         let mut config_file = ConfigFile::new_gd();
-        config_file.load("user://settings.cfg");
+        config_file.load(&self.settings_config_name);
 
         let mut ms: f64 = self.global_mouse_sensitivity;
         let value: Variant = config_file.get_value_ex(
@@ -56,8 +59,7 @@ impl INode3D for Game {
                     "mouse_sensitivity",
                     &Variant::from(this.global_mouse_sensitivity),
                 );
-                config_file.save("user://settings.cfg");
-                godot_print!("Configs saved! {}", this.global_mouse_sensitivity);
+                config_file.save(&this.settings_config_name);
             });
 
         self.pause_menu
