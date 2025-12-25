@@ -1,6 +1,6 @@
 [gd_scene load_steps=5 format=3 uid="uid://bfd2lo232dfv"]
 
-[ext_resource type="PackedScene" uid="uid://qvkf2syyk2uu" path="res://gridmap/grid_map_1.tscn" id="1_feb5d"]
+[ext_resource type="PackedScene" uid="uid://qvkf2syyk2uu" path="res://arenas/arena_1.tscn" id="1_feb5d"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_ig7tw"]
 sun_angle_max = 11.78
@@ -17,10 +17,9 @@ sky = SubResource("Sky_0xm2m")
 player_spawner = NodePath("NPlayers")
 pause_menu = NodePath("PauseMenu")
 
-[node name="GridMap1" parent="." instance=ExtResource("1_feb5d")]
+[node name="Arena1" parent="." instance=ExtResource("1_feb5d")]
 
-[node name="NPlayers" type="NPlayers" parent="." node_paths=PackedStringArray("spawn_points_container")]
-spawn_points_container = NodePath("")
+[node name="NPlayers" type="NPlayers" parent="."]
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_h2yge")

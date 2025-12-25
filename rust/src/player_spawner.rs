@@ -10,7 +10,7 @@ use crate::player::Player;
 pub struct NPlayers {
     #[init(val=OnReady::from_loaded("res://player/player.tscn"))]
     player_scene: OnReady<Gd<PackedScene>>,
-    #[init(node="../Arena")]
+    #[init(node="../Arena1/SpawnPoints")]
     spawn_points_container: OnReady<Gd<Node>>,
     player_info: VarDictionary,
     base: Base<Node>,
@@ -19,6 +19,8 @@ pub struct NPlayers {
 #[godot_api]
 impl INode for NPlayers {
     fn ready(&mut self) {
+        // self.base().get_node_as::<Node>("../Arena1");
+
         if self.base().is_multiplayer_authority() {
             let player_info = self.player_info.clone();
             for (id, _name) in player_info.iter_shared().typed::<i64, GString>() {
@@ -40,6 +42,8 @@ impl NPlayers {
         // Crate player instance
         let mut player: Gd<Player> = self.player_scene.instantiate_as();
 
+        player.set_position(self.sample_spawn_point());
+
         // Set player authority and camera state
         player.set_multiplayer_authority(peer_id as i32);
         // Must set multiplayer authority before adding
@@ -51,5 +55,34 @@ impl NPlayers {
         if do_connect_camera {
             player.bind_mut().set_camera_current(true);
         }
+    }
+
+    fn sample_spawn_point(&self) -> Vector3 {
+        // Pick a random spawn point
+        let spawn_points = self.spawn_points_container.get_children();
+        let point = spawn_points.pick_random().unwrap().cast::<Node3D>();
+        point.get_position()
+    }
+
+    // fn sample_spawn_point_filtered(&mut self) -> Vector3 {
+        // Pick a random spawn point, filtering out ones with players nearby
+        // let spawn_points = self.spawn_points_container.get_children();
+        // PackedVector3Array::
+        // let filtered = spawn_points
+        //     .functional_ops()
+        //     .filter(&Callable::from_fn("is_even", |args| {
+        //         let arg = args[0];
+        //         *arg.try_to::<Node3D>();
+        //         true
+// }));
+        // let point = filtered.pick_random().unwrap().cast::<Node3D>();
+        // point.get_position()
+    // }
+
+    #[func]
+    fn filter_point(&mut self, args: Array<Variant>) -> bool {
+        godot_print!("Filtering: {:?}", args);
+        // point: Gd<Node3D> = args;
+        true
     }
 }
