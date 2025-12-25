@@ -10,8 +10,8 @@ use crate::player::Player;
 pub struct NPlayers {
     #[init(val=OnReady::from_loaded("res://player/player.tscn"))]
     player_scene: OnReady<Gd<PackedScene>>,
-    #[export]
-    spawn_points_container: OnEditor<Gd<Node>>,
+    #[init(node="../Arena")]
+    spawn_points_container: OnReady<Gd<Node>>,
     player_info: VarDictionary,
     base: Base<Node>,
 }
