@@ -20,9 +20,7 @@ pause_menu = NodePath("PauseMenu")
 [node name="GridMap1" parent="." instance=ExtResource("1_feb5d")]
 
 [node name="NPlayers" type="NPlayers" parent="." node_paths=PackedStringArray("spawn_points_container")]
-spawn_points_container = NodePath("../SpawnPoints")
-
-[node name="SpawnPoints" type="Node" parent="."]
+spawn_points_container = NodePath("")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_h2yge")
@@ -140,5 +138,3 @@ offset_bottom = 23.0
 grow_horizontal = 2
 text = "Mouse Sensitivity"
 horizontal_alignment = 1
-
-[node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="."]
