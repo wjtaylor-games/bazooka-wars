@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=4 uid="uid://djue2jfmxkahd"]
+[gd_scene load_steps=15 format=4 uid="uid://djue2jfmxkahd"]
 
 [ext_resource type="Texture2D" uid="uid://c2kpf7po06cfx" path="res://player/player.png" id="1_oul6g"]
 [ext_resource type="Material" uid="uid://b3jhh4cetcqqr" path="res://player/bazooka.tres" id="1_rkbax"]
@@ -89,6 +89,66 @@ material = SubResource("StandardMaterial3D_rkbax")
 friction = 0.95
 bounce = 0.8
 
+[sub_resource type="Animation" id="Animation_rkbax"]
+resource_name = "reload"
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("PlayerKinematicBody/Bazooka/RocketMesh:visible")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.05, 0.6),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 1,
+"values": [true, false, true]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("PlayerKinematicBody/Bazooka/RocketMesh:scale")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.05, 0.6, 1),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 0,
+"values": [Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(0.004999995, 0.004999995, 0.004999995), Vector3(1, 1, 1)]
+}
+
+[sub_resource type="Animation" id="Animation_g1dw6"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("PlayerKinematicBody/Bazooka/RocketMesh:visible")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [true]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("PlayerKinematicBody/Bazooka/RocketMesh:scale")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector3(1, 1, 1)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_yw30f"]
+_data = {
+&"RESET": SubResource("Animation_g1dw6"),
+&"reload": SubResource("Animation_rkbax")
+}
+
 [node name="Player" type="Player"]
 
 [node name="PlayerKinematicBody" type="PlayerKinematicBody" parent="."]
@@ -139,9 +199,10 @@ skeleton = NodePath("../../PlayerKinematicBody")
 wait_time = 3.0
 one_shot = true
 
-[node name="ReloadTimer" type="Timer" parent="."]
-wait_time = 0.1
-one_shot = true
-
 [node name="SphereCollider" type="CollisionShape3D" parent="."]
 shape = SubResource("SphereShape3D_kqu6x")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+libraries = {
+&"": SubResource("AnimationLibrary_yw30f")
+}

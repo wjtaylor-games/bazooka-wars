@@ -3,7 +3,8 @@ use godot::prelude::*;
 #[allow(unused_imports)]
 use godot::classes::{RigidBody3D, IRigidBody3D, CharacterBody3D, ICharacterBody3D,
     Input, InputEvent, Camera3D, InputEventMouseMotion, MeshInstance3D, Timer,
-    InputEventAction, Area3D, IArea3D, CollisionShape3D
+    InputEventAction, Area3D, IArea3D, CollisionShape3D,
+    AnimationPlayer,
 };
 use godot::classes::input::MouseMode;
 use godot::classes::ProjectSettings;
@@ -30,8 +31,8 @@ pub struct Player {
     sphere_collider: OnReady<Gd<CollisionShape3D>>,
     #[init(node="RagdollTimer")]
     ragdoll_timer: OnReady<Gd<Timer>>,
-    #[init(node="ReloadTimer")]
-    reload_timer: OnReady<Gd<Timer>>,
+    #[init(node="AnimationPlayer")]
+    animation_player: OnReady<Gd<AnimationPlayer>>,
     #[init(val=OnReady::from_loaded("res://rocket/rocket.tscn"))]
     rocket_scene: OnReady<Gd<PackedScene>>,
     #[init(node="../..")]
@@ -116,10 +117,14 @@ impl IArea3D for Player {
             .timeout()
             .connect_other(&self.to_gd(), Self::end_ragdoll);
 
-        self.reload_timer
+        self.animation_player
             .signals()
-            .timeout()
-            .connect_other(&self.to_gd(), |this| {this.bazooka_loaded = true});
+            .animation_finished()
+            .connect_other(&self.to_gd(), |this, anim_name: StringName| {
+                if anim_name == "reload".into() { 
+                    this.bazooka_loaded = true;
+                }
+            });
 
         self.signals()
             .area_entered()
@@ -229,7 +234,7 @@ impl Player {
                 .add_child(&rocket);
 
             self.bazooka_loaded = false;
-            self.reload_timer.start();
+            self.animation_player.play_ex().name("reload").done();
         }
     }
 
