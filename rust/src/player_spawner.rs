@@ -55,6 +55,15 @@ impl NPlayers {
         if do_connect_camera {
             player.bind_mut().set_camera_current(true);
         }
+
+        player.signals()
+            .out_of_bounds()
+            .connect_other(&self.to_gd(), Self::respawn_player);
+    }
+
+    pub fn respawn_player(&mut self, mut player: Gd<Player>) {
+        let pos = self.sample_spawn_point();
+        player.rpc("respawn", vslice![pos]);
     }
 
     fn sample_spawn_point(&self) -> Vector3 {

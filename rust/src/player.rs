@@ -75,7 +75,9 @@ impl IArea3D for Player {
             self.base_mut().rpc("sync_ragdoll", args);
             // Out of bounds condition
             if pos.y < -10.0 {
-                self.base_mut().rpc("reset_pos", &[]);
+                let gd_ref = self.to_gd();
+                self.signals().out_of_bounds().emit(&gd_ref);
+                // self.base_mut().rpc("respawn", &[]);
             }
         }
     }
@@ -161,10 +163,12 @@ impl Player {
         }
     }
 
+    #[signal]
+    pub fn out_of_bounds(&mut player: Gd<Player>);
+
     #[rpc(authority, call_local)]
-    pub fn reset_pos(&mut self) {
-        // Reset to initial position
-        let pos = self.init_pos;
+    pub fn respawn(&mut self, pos: Vector3) {
+        // Reset to a given spawn point
         self.base_mut().set_position(pos);
         self.player_dynamic_body.set_position(pos);
         self.player_kinematic_body.set_position(pos);
