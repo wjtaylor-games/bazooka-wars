@@ -70,8 +70,9 @@ offset_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="PauseMenu" type="PauseMenu" parent="." node_paths=PackedStringArray("unpause_button", "sensitivity_slider")]
-unpause_button = NodePath("CenterContainer/ResumeButton")
+[node name="PauseMenu" type="PauseMenu" parent="." node_paths=PackedStringArray("unpause_button", "exit_button", "sensitivity_slider")]
+unpause_button = NodePath("CenterContainer/VBoxContainer/ResumeButton")
+exit_button = NodePath("CenterContainer/VBoxContainer/ExitButton")
 sensitivity_slider = NodePath("MouseSensitivity")
 paused = true
 anchors_preset = 15
@@ -98,10 +99,19 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="ResumeButton" type="Button" parent="PauseMenu/CenterContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="PauseMenu/CenterContainer"]
+layout_mode = 2
+
+[node name="ResumeButton" type="Button" parent="PauseMenu/CenterContainer/VBoxContainer"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 32
 text = "Resume"
+
+[node name="ExitButton" type="Button" parent="PauseMenu/CenterContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Exit Game
+"
 
 [node name="Label" type="Label" parent="PauseMenu"]
 layout_mode = 1
@@ -121,7 +131,7 @@ vertical_alignment = 2
 layout_mode = 0
 offset_left = 57.0
 offset_top = 217.0
-offset_right = 419.0
+offset_right = 334.0
 offset_bottom = 294.0
 min_value = 0.1
 max_value = 1.0

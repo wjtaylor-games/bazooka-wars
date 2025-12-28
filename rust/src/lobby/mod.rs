@@ -168,13 +168,13 @@ impl Lobby {
 
     fn on_start_game_pressed(&mut self) {
         if self.base().get_multiplayer().unwrap().is_server() {
-            self.base_mut().rpc("start_game", &[]);
+            self.base_mut().rpc("start_game_remote", &[]);
             self.start_game_authority();
         }
     }
 
     #[rpc(authority, call_remote, reliable)]
-    fn start_game(&mut self) {
+    fn start_game_remote(&mut self) {
         // Instantiate the game scene
         let game = load::<PackedScene>("res://game.tscn").instantiate_as::<Game>();
 
@@ -191,6 +191,17 @@ impl Lobby {
         // Start the game, and also kick off the player spawner
         let mut game = load::<PackedScene>("res://game.tscn").instantiate_as::<Game>();
         game.bind_mut().initialize_authority(&self.player_names_dict);
+
+        game.bind_mut()
+            .get_pause_menu()
+            .unwrap()
+            .signals()
+            .exit_pressed()
+            .builder()
+            .connect_other_mut(&self.to_gd(), |this| {
+                this.base_mut().rpc("end_game_to_lobby", &[]);
+            });
+
         self.base_mut()
             .get_tree()
             .unwrap()
@@ -199,7 +210,21 @@ impl Lobby {
             .add_child(&game);
         self.base_mut().hide();
 
+    }
 
+    #[rpc(authority, call_local, reliable)]
+    fn end_game_to_lobby(&mut self) {
+        // Everyone ends the game and return to the lobby
+        if self.base().has_node("/root/Game") {
+            self.base().get_node_as::<Node>("/root/Game").queue_free();
+            // Free the mouse cursor
+            let mut input = Input::singleton();
+            input.set_mouse_mode(MouseMode::VISIBLE);
+        }
+        self.base_mut().show();
+        self.show_lobby();
+
+        self.set_status("Game ended", false);
     }
 
     fn end_game(&mut self, with_error: &str) {

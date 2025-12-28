@@ -16,10 +16,6 @@ use crate::explosion::Explosion;
 use crate::rocket::Rocket;
 use crate::game::Game;
 
-// const SHOOT_SCALE: f32 = 2.0;
-// const CHAR_SCALE: Vector3 = Vector3::new(0.3, 0.3, 0.3);
-
-
 #[derive(GodotClass)]
 #[class(base=Area3D, init)]
 pub struct Player {

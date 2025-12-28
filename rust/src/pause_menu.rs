@@ -14,6 +14,8 @@ pub struct PauseMenu {
     #[export]
     unpause_button: OnEditor<Gd<Button>>,
     #[export]
+    exit_button: OnEditor<Gd<Button>>,
+    #[export]
     sensitivity_slider: OnEditor<Gd<Slider>>,
     #[export]
     paused: bool,
@@ -28,10 +30,16 @@ impl IControl for PauseMenu {
         } else {
             self.unpause();
         }
+        self.exit_button
+            .signals()
+            .pressed()
+            .connect_other(&self.to_gd(), Self::exit_pressed);
+
         self.unpause_button
             .signals()
             .pressed()
             .connect_other(&self.to_gd(), Self::unpause);
+
     }
 
     fn input(&mut self, event: Gd<InputEvent>) {
@@ -62,4 +70,13 @@ impl PauseMenu {
 
     #[signal]
     pub fn unpause();
+
+    #[func]
+    fn exit_pressed(&mut self) {
+        self.signals().exit_pressed().emit();
+    }
+
+    #[signal]
+    pub fn exit_pressed();
+
 }
