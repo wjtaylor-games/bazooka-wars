@@ -4,7 +4,7 @@ use godot::classes::object::ConnectFlags;
 use godot::classes::{
     Button, ENetMultiplayerPeer, Label, LineEdit, LinkButton, ProjectSettings,
     Control, IControl,
-    Input,
+    Input, ConfigFile,
 };
 use godot::classes::input::{MouseMode};
 use godot::global::Error;
@@ -45,6 +45,9 @@ pub struct Lobby {
     port_forward_label: OnEditor<Gd<Label>>,
     #[export]
     find_public_ip_button: OnEditor<Gd<LinkButton>>,
+    #[export]
+    #[init(val=GString::from("user://settings.cfg"))]
+    settings_config_name: GString,
     player_names_dict: VarDictionary,
     peer: Option<Gd<ENetMultiplayerPeer>>,
     base: Base<Control>,
@@ -149,6 +152,17 @@ impl IControl for Lobby {
             .signals()
             .pressed()
             .connect_other(&gd_ref, Self::on_start_game_pressed);
+        
+        let mut config_file = ConfigFile::new_gd();
+        config_file.load(&self.settings_config_name);
+        let ip_text: GString = config_file
+            .get_value_ex("Lobby", "prev_ip_address")
+            .default(&Variant::from("127.0.0.1"))
+            .done()
+            .try_to::<GString>()
+            .unwrap()
+            ;
+        self.address.set_text(&ip_text);
 
     }
 }
@@ -209,7 +223,6 @@ impl Lobby {
             .unwrap()
             .add_child(&game);
         self.base_mut().hide();
-
     }
 
     #[rpc(authority, call_local, reliable)]
@@ -247,6 +260,7 @@ impl Lobby {
     }
 
     fn on_host_btn_pressed(&mut self) {
+        self.save_config();
         let mut peer = ENetMultiplayerPeer::new_gd();
         self.peer = Some(peer.clone());
         // Set a maximum of ... let's say 10 players.
@@ -283,6 +297,7 @@ impl Lobby {
     }
 
     fn on_join_btn_pressed(&mut self) {
+        self.save_config();
         let ip = self.address.get_text();
         if !ip.is_valid_ip_address() {
             self.set_status("IP address is invalid.", false);
@@ -311,6 +326,17 @@ impl Lobby {
             &self.name_input.get_text(),
             true
         );
+    }
+
+    fn save_config(&self) {
+        let mut config_file = ConfigFile::new_gd();
+        config_file.set_value(
+            "Lobby",
+            "prev_ip_address",
+            &Variant::from(self.address.get_text()),
+        );
+        config_file.save(&self.settings_config_name);
+
     }
 
     #[rpc(any_peer, call_remote, reliable)]

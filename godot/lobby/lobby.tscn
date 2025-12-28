@@ -22,7 +22,6 @@ size_flags_horizontal = 0
 size_flags_vertical = 0
 
 [node name="JoinPanel" type="Panel" parent="."]
-visible = false
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5

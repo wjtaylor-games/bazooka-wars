@@ -110,8 +110,7 @@ text = "Resume"
 [node name="ExitButton" type="Button" parent="PauseMenu/CenterContainer/VBoxContainer"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 32
-text = "Exit Game
-"
+text = "End War"
 
 [node name="Label" type="Label" parent="PauseMenu"]
 layout_mode = 1
