@@ -23,8 +23,8 @@ impl INode for NPlayers {
 
         if self.base().is_multiplayer_authority() {
             let player_info = self.player_info.clone();
-            for (id, _name) in player_info.iter_shared().typed::<i64, GString>() {
-                self.base_mut().rpc("spawn_player", vslice![id]);
+            for (id, name) in player_info.iter_shared().typed::<i64, GString>() {
+                self.base_mut().rpc("spawn_player", vslice![id, name]);
             }
         }
     }
@@ -38,7 +38,7 @@ impl NPlayers {
     }
 
     #[rpc(authority, call_local, reliable)]
-    pub fn spawn_player(&mut self, peer_id: i64) {
+    pub fn spawn_player(&mut self, peer_id: i64, name: GString) {
         // Crate player instance
         let mut player: Gd<Player> = self.player_scene.instantiate_as();
 
@@ -49,6 +49,8 @@ impl NPlayers {
         // Must set multiplayer authority before adding
         // to scene tree so that it inherits correctly
         self.base_mut().add_child(&player);
+
+        player.bind_mut().get_name_label().set_text(&name);
 
         let this_id = self.base().get_multiplayer().unwrap().get_unique_id();
         let do_connect_camera: bool = this_id as i64 == peer_id;

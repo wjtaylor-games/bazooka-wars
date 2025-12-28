@@ -4,6 +4,7 @@ use godot::prelude::*;
 use godot::classes::{RigidBody3D, IRigidBody3D, CharacterBody3D, ICharacterBody3D,
     Input, InputEvent, Camera3D, InputEventMouseMotion, MeshInstance3D, Timer,
     InputEventAction, Area3D, IArea3D, CollisionShape3D,
+    Label3D,
     AnimationPlayer,
 };
 use godot::classes::input::MouseMode;
@@ -29,9 +30,12 @@ pub struct Player {
     ragdoll_timer: OnReady<Gd<Timer>>,
     #[init(node="AnimationPlayer")]
     animation_player: OnReady<Gd<AnimationPlayer>>,
+    #[var]
+    #[init(node="NameLabel")]
+    name_label: OnReady<Gd<Label3D>>,
     #[init(val=OnReady::from_loaded("res://rocket/rocket.tscn"))]
     rocket_scene: OnReady<Gd<PackedScene>>,
-    #[init(node="../..")]
+    #[init(node="/root/Game")]
     game_root: OnReady<Gd<Game>>,
     #[export]
     #[init(val=15.0)]
@@ -41,7 +45,6 @@ pub struct Player {
     bazooka_loaded: bool,
     init_pos: Vector3,
     init_rot: Vector3,
-    peer_id: i64,
     base: Base<Area3D>
 }
 
@@ -138,16 +141,6 @@ impl IArea3D for Player {
 
 #[godot_api]
 impl Player {
-
-    #[func]
-    pub fn set_peer_id(&mut self, peer_id: i64) {
-        self.peer_id = peer_id;
-    }
-
-    #[func]
-    pub fn get_peer_id(&self) -> i64 {
-        self.peer_id
-    }
 
     #[func]
     pub fn on_area_entered(&mut self, area: Gd<Area3D>) {
