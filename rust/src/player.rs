@@ -40,6 +40,9 @@ pub struct Player {
     #[export]
     #[init(val=15.0)]
     rocket_init_vel: f32,
+    #[export]
+    #[init(val=3.0)]
+    rocket_init_roll_vel: f32,
     ragdoll: bool,
     is_out_of_bounds: bool,
     #[var]
@@ -222,6 +225,9 @@ impl Player {
             rocket.set_linear_velocity(
                 rocket_basis * Vector3::FORWARD * self.rocket_init_vel
                 + base_velocity
+            );
+            rocket.set_angular_velocity(
+                rocket_basis * Vector3::FORWARD * self.rocket_init_roll_vel
             );
             self.base_mut()
                 .get_tree()

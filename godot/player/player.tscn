@@ -150,6 +150,8 @@ _data = {
 }
 
 [node name="Player" type="Player"]
+rocket_init_vel = 20.0
+rocket_init_roll_vel = 5.0
 
 [node name="PlayerKinematicBody" type="PlayerKinematicBody" parent="."]
 jump_velocity = 5.0
