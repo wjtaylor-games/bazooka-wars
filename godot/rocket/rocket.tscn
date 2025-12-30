@@ -1,6 +1,7 @@
-[gd_scene load_steps=8 format=4 uid="uid://dbmej3tieaa2y"]
+[gd_scene load_steps=9 format=4 uid="uid://dbmej3tieaa2y"]
 
 [ext_resource type="Material" uid="uid://cxhaa6i7bto07" path="res://explosion/ExplosionMaterial.tres" id="1_i0la0"]
+[ext_resource type="AudioStream" uid="uid://c5aj1yhahu8w1" path="res://rocket/missile-launch-2_smcameron.wav" id="2_vaqdw"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_4cc4r"]
 resource_name = "rocket"
@@ -90,3 +91,9 @@ fixed_fps = 60
 visibility_aabb = AABB(-4, -4, -4.79199, 8, 8, 8)
 process_material = SubResource("ParticleProcessMaterial_vaqdw")
 draw_pass_1 = SubResource("QuadMesh_c7012")
+
+[node name="AudioStreamPlayer3D" type="AudioStreamPlayer3D" parent="."]
+stream = ExtResource("2_vaqdw")
+volume_db = 2.689
+pitch_scale = 1.15
+autoplay = true
