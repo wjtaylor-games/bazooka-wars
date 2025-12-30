@@ -1,4 +1,6 @@
-[gd_scene load_steps=5 format=4 uid="uid://dbmej3tieaa2y"]
+[gd_scene load_steps=8 format=4 uid="uid://dbmej3tieaa2y"]
+
+[ext_resource type="Material" uid="uid://cxhaa6i7bto07" path="res://explosion/ExplosionMaterial.tres" id="1_i0la0"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_4cc4r"]
 resource_name = "rocket"
@@ -44,6 +46,19 @@ shadow_mesh = SubResource("ArrayMesh_c1s2o")
 height = 1.5
 radius = 0.1
 
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_vaqdw"]
+angle_max = 1.0
+direction = Vector3(0, 0, 1)
+spread = 0.0
+initial_velocity_min = 1.5
+initial_velocity_max = 1.5
+angular_velocity_max = 10.0
+gravity = Vector3(0, 0, 0)
+linear_accel_min = 0.009997765
+linear_accel_max = 0.009997765
+
+[sub_resource type="QuadMesh" id="QuadMesh_c7012"]
+
 [node name="Rocket" type="Rocket"]
 thrust = 2000.0
 cm_alpha = -0.01
@@ -63,3 +78,15 @@ skeleton = NodePath("")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 0, 0)
 shape = SubResource("CylinderShape3D_spto3")
+
+[node name="Explosion2" type="GPUParticles3D" parent="."]
+transform = Transform3D(0.996103, 0, 0, 0, 0.996103, 0, 0, 0, 1, -0.00112057, -0.00427759, 0.735043)
+material_override = ExtResource("1_i0la0")
+cast_shadow = 0
+amount = 5
+lifetime = 0.3
+randomness = 0.84
+fixed_fps = 60
+visibility_aabb = AABB(-4, -4, -4.79199, 8, 8, 8)
+process_material = SubResource("ParticleProcessMaterial_vaqdw")
+draw_pass_1 = SubResource("QuadMesh_c7012")
