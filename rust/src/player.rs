@@ -130,6 +130,7 @@ impl IArea3D for Player {
             .connect_self(Self::on_area_entered);
 
         if self.base().is_multiplayer_authority() {
+            self.name_label.set_visible(false);
             self.game_root
                 .signals()
                 .mouse_sensitivity_changed()
