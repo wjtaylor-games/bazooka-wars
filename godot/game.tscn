@@ -19,7 +19,8 @@ pause_menu = NodePath("PauseMenu")
 
 [node name="Arena1" parent="." instance=ExtResource("1_feb5d")]
 
-[node name="NPlayers" type="NPlayers" parent="."]
+[node name="NPlayers" type="NPlayers" parent="." node_paths=PackedStringArray("ko_label")]
+ko_label = NodePath("../HUD/HBoxContainer/KnockoutsCount")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_h2yge")
@@ -70,11 +71,32 @@ offset_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
+[node name="HBoxContainer" type="HBoxContainer" parent="HUD"]
+layout_mode = 0
+offset_left = 934.0
+offset_top = 25.0
+offset_right = 1106.0
+offset_bottom = 61.0
+
+[node name="Label" type="Label" parent="HUD/HBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Knockouts: "
+
+[node name="KnockoutsCount" type="Label" parent="HUD/HBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.91, 0.20020004, 0.20020004, 1)
+theme_override_colors/font_shadow_color = Color(0.27450982, 0, 0, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 24
+text = "0"
+
 [node name="PauseMenu" type="PauseMenu" parent="." node_paths=PackedStringArray("unpause_button", "exit_button", "sensitivity_slider")]
 unpause_button = NodePath("CenterContainer/VBoxContainer/ResumeButton")
 exit_button = NodePath("CenterContainer/VBoxContainer/ExitButton")
 sensitivity_slider = NodePath("MouseSensitivity")
 paused = true
+visible = false
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0

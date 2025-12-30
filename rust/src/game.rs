@@ -44,7 +44,7 @@ impl INode3D for Game {
         } else {
             self.global_mouse_sensitivity
         };
-
+        
         self.pause_menu.bind_mut().get_sensitivity_slider()
             .unwrap().set_value(ms);
 

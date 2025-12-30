@@ -41,6 +41,9 @@ pub struct Player {
     #[init(val=15.0)]
     rocket_init_vel: f32,
     ragdoll: bool,
+    is_out_of_bounds: bool,
+    #[var]
+    ko_count: i32,
     #[init(val=true)]
     bazooka_loaded: bool,
     init_pos: Vector3,
@@ -74,10 +77,11 @@ impl IArea3D for Player {
             let args = vslice![self.ragdoll];
             self.base_mut().rpc("sync_ragdoll", args);
             // Out of bounds condition
-            if pos.y < -10.0 {
+            if !self.is_out_of_bounds && pos.y < -10.0 {
                 let gd_ref = self.to_gd();
+                self.is_out_of_bounds = true;
+                self.ko_count += 1;
                 self.signals().out_of_bounds().emit(&gd_ref);
-                // self.base_mut().rpc("respawn", &[]);
             }
         }
     }
@@ -134,8 +138,10 @@ impl IArea3D for Player {
             self.game_root
                 .signals()
                 .mouse_sensitivity_changed()
-                .connect_other(&*self.player_kinematic_body,
-                    PlayerKinematicBody::on_mouse_sensitivity_changed);
+                .connect_other(
+                    &*self.player_kinematic_body,
+                    PlayerKinematicBody::on_mouse_sensitivity_changed
+                );
         }
     }    
 }
@@ -173,6 +179,7 @@ impl Player {
         self.player_kinematic_body.set_velocity(Vector3::ZERO);
         self.player_dynamic_body.set_angular_velocity(Vector3::ZERO);
         self.end_ragdoll();
+        self.is_out_of_bounds = false;
     }
 
     fn begin_ragdoll(&mut self) {
